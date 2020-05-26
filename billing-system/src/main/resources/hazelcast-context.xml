@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:util="http://www.springframework.org/schema/util" xmlns:hz="http://www.hazelcast.com/schema/spring"
+	xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd
+http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd
+http://www.springframework.org/schema/jdbc http://www.springframework.org/schema/jdbc/spring-jdbc-3.0.xsd
+http://www.springframework.org/schema/util http://www.springframework.org/schema/util/spring-util-3.0.xsd
+http://www.hazelcast.com/schema/spring classpath:hazelcast.xsd">
+
+	<hz:hazelcast id="instance">
+		<hz:config>
+			<hz:group name="billing" password="r4h4$14" />
+			<hz:network port="5710" port-auto-increment="true">
+				<hz:join>
+					<hz:multicast enabled="false" multicast-group="224.2.2.3"
+						multicast-port="54327" />
+				</hz:join>
+			</hz:network>
+			<hz:map name="MemberLock" time-to-live-seconds="90" />
+			<hz:map name="Biller" time-to-live-seconds="3600" />
+		</hz:config>
+	</hz:hazelcast>
+</beans>

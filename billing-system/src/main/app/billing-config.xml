@@ -1,0 +1,121 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+	<spring:beans>
+		<spring:bean id="BillingServiceImpl" class="org.billing.api.handler.BillingHandler" />
+	</spring:beans>
+
+	<flow name="billing-getAllFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="billing" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.currentPage != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.pageSize != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="getAllBilling"
+			methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[flowVars['token']]"
+			object-ref="BillingServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="billing-getByIDFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="billing/{billingID}" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter
+					expression="#[message.inboundProperties.'http.uri.params'.billingID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="getBillingByID"
+			methodArguments="#[message.inboundProperties.'http.uri.params'.billingID], #[flowVars['token']]"
+			object-ref="BillingServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="billing-createFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="billing" allowedMethods="POST" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter expression="#[payload.name != null]" />
+				<expression-filter expression="#[payload.billingCycle != null]" />
+				<expression-filter expression="#[payload.outstanding != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<custom-transformer class="org.billing.api.processor.BillingTransformer"
+			doc:name="Java" />
+		<invoke method="createBilling" methodArguments="#[payload], #[flowVars['token']]"
+			object-ref="BillingServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="billing-updateFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="billing/{billingID}" allowedMethods="PUT" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.uri.params'.billingID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<custom-transformer class="org.billing.api.processor.BillingTransformer"
+			doc:name="Java" />
+		<invoke method="updateBilling"
+			methodArguments="#[message.inboundProperties.'http.uri.params'.billingID], #[payload], #[flowVars['token']]"
+			object-ref="BillingServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+	
+	<flow name="billing-deleteFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="billing/{billingID}" allowedMethods="DELETE" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.uri.params'.billingID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="deleteBilling"
+			methodArguments="#[message.inboundProperties.'http.uri.params'.billingID], #[flowVars['token']]"
+			object-ref="BillingServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+</mule>

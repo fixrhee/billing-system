@@ -1,0 +1,151 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+	<spring:beans>
+		<spring:bean id="MemberServiceImpl" class="org.billing.api.handler.MemberHandler" />
+	</spring:beans>
+
+	<flow name="member-loginFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/login" allowedMethods="POST" doc:name="HTTP" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter expression="#[payload.username != null]" />
+				<expression-filter expression="#[payload.password != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="createJWTHMAC256" methodArguments="#[payload.username], #[payload.password]"
+			object-ref="MemberServiceImpl" />
+		<flow-ref name="responseFlow" />
+	</flow>
+
+	<flow name="member-getProfileFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/profile" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<expression-filter expression="#[flowVars['token'] != null]" />
+		</message-filter>
+		<invoke method="getMemberProfile" methodArguments="#[flowVars['token']]"
+			object-ref="MemberServiceImpl" />
+		<flow-ref name="responseFlow" />
+	</flow>
+
+	<flow name="member-getByIDFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/{memberID}" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter
+					expression="#[message.inboundProperties.'http.uri.params'.memberID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="getMemberByID"
+			methodArguments="#[message.inboundProperties.'http.uri.params'.memberID], #[flowVars['token']]"
+			object-ref="MemberServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="member-getAllFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.currentPage != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.pageSize != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="getAllMember"
+			methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[flowVars['token']]"
+			object-ref="MemberServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="member-createFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member" allowedMethods="POST" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter expression="#[payload.name != null]" />
+				<expression-filter expression="#[payload.msisdn != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<custom-transformer class="org.billing.api.processor.MemberTransformer"
+			doc:name="Java" />
+		<invoke method="createMember" methodArguments="#[payload], #[flowVars['token']]"
+			object-ref="MemberServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="member-updateFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/{memberID}" allowedMethods="PUT" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.uri.params'.memberID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<custom-transformer class="org.billing.api.processor.MemberTransformer"
+			doc:name="Java" />
+		<invoke method="updateMember"
+			methodArguments="#[message.inboundProperties.'http.uri.params'.memberID], #[payload], #[flowVars['token']]"
+			object-ref="MemberServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="member-deleteFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/{memberID}" allowedMethods="DELETE" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.uri.params'.memberID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="deleteMember"
+			methodArguments="#[message.inboundProperties.'http.uri.params'.memberID], #[flowVars['token']]"
+			object-ref="MemberServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+</mule>

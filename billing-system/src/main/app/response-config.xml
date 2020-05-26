@@ -1,0 +1,30 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
+	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
+	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
+
+	<flow name="responseFlow">
+		<set-property propertyName="http.status" value="#[payload.responseCode]"
+			doc:name="HTTP_STATUS" />
+		<json:object-to-json-transformer
+			mapper-ref="jacksonObjectMapper" />
+	</flow>
+
+	<flow name="invalidParameterFlow">
+		<expression-component doc:name="Expression">
+			<![CDATA[
+			resp = new org.billing.api.data.ServiceResponse();
+			resp.status = 'INVALID_PARAMETER';
+			resp.responseCode = '400';
+			resp.description = 'Incomplete Request Parameter';
+			payload = resp;]]>
+		</expression-component>
+		<flow-ref name="responseFlow" />
+	</flow>
+	
+</mule>
