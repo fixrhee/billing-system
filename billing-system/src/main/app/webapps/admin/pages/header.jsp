@@ -29,6 +29,7 @@
 <!-- DataTables -->
 <link rel="stylesheet" href="plugins/datatables-bs4/css/dataTables.bootstrap4.min.css">
 <link rel="stylesheet" href="plugins/datatables-responsive/css/responsive.bootstrap4.min.css"
+<link rel="stylesheet" href="plugins/datatables/dataTables.checkboxes.css"
 <!-- Daterange picker -->
 <link rel="stylesheet"
 	href="plugins/daterangepicker/daterangepicker.css">
@@ -40,7 +41,11 @@
 	rel="stylesheet">
 <!-- PNotify -->
 <link href="plugins/pnotify/dist/pnotify.custom.min.css" rel="stylesheet">
- 	
+<!-- Smart Wizard -->
+<link href="plugins/wizard/smart_wizard_all.css" rel="stylesheet">
+ <!-- Bootstrap4 Duallistbox -->
+<link rel="stylesheet" href="plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
+
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 	<div class="wrapper">
@@ -52,7 +57,7 @@
 					href="#" role="button"><i class="fas fa-bars"></i></a></li>
 			</ul>
 
-			<!-- SEARCH FORM -->
+			<!-- SEARCH FORM >
 			<form class="form-inline ml-3">
 				<div class="input-group input-group-sm">
 					<input class="form-control form-control-navbar" type="search"
@@ -63,14 +68,14 @@
 						</button>
 					</div>
 				</div>
-			</form>
+			</form -->
 
 			<!-- Right navbar links -->
 			<ul class="navbar-nav ml-auto">
 
 				<!-- Notifications Dropdown Menu -->
 				<li class="nav-item dropdown"><a class="nav-link"
-					data-toggle="dropdown" href="#"> <i class="far fa-bell"></i> <span
+					data-toggle="dropdown" href="#"> <i class="far fa-envelope"></i> <span
 						class="badge badge-warning navbar-badge">15</span>
 				</a>
 					<div class="dropdown-menu dropdown-menu-lg dropdown-menu-right">

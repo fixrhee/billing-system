@@ -44,6 +44,33 @@ public class MemberHandler {
 		}
 	}
 
+	public ServiceResponse getMemberByUsername(String username, String token) {
+		try {
+			Member lacq = memberProcessor.getMemberByUsername(username, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
+	public ServiceResponse getMemberByBilling(int currentPage, int pageSize, String id, String token) {
+		try {
+			Map<String, Object> lacq = memberProcessor.getMemberByBilling(currentPage, pageSize, id, token, false);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
+	public ServiceResponse getMemberByBillingReduce(int currentPage, int pageSize, String id, String token) {
+		try {
+			Map<String, Object> lacq = memberProcessor.getMemberByBilling(currentPage, pageSize, id, token, true);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
 	public ServiceResponse getMemberProfile(String token) {
 		try {
 			Member lacq = memberProcessor.getMemberProfile(token);
@@ -75,6 +102,15 @@ public class MemberHandler {
 		try {
 			memberProcessor.deleteMember(id, token);
 			return ResponseBuilder.getStatus(Status.PROCESSED, null);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
+	public ServiceResponse getMenu(String token) throws TransactionException {
+		try {
+			Map<String, Object> lp = memberProcessor.getMemberMenu(token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lp);
 		} catch (TransactionException e) {
 			return ResponseBuilder.getStatus(e.getMessage(), null);
 		}

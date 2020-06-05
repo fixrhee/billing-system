@@ -96,6 +96,31 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			object-ref="InvoiceServiceImpl" doc:name="Invoke" />
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
 	</flow>
+	
+	<flow name="invoice-bulkCreateFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="invoice/bulk" allowedMethods="POST" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+			<logger level="INFO"/>
+			<logger level="INFO" message="#[payload]"/>
+		<!-- message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter expression="#[payload.billingID != null]" />
+				<expression-filter expression="#[payload.memberID != null]" />
+				<expression-filter expression="#[payload.amount != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<custom-transformer class="org.billing.api.processor.InvoiceTransformer"
+			doc:name="Java" />
+		<invoke method="createInvoice" methodArguments="#[payload], #[flowVars['token']]"
+			object-ref="InvoiceServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" / -->
+		
+	</flow>
 
 	<flow name="invoice-updateFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"

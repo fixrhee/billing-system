@@ -25,40 +25,9 @@
 						data-widget="treeview" role="menu" data-accordion="false">
 						<!-- Add icons to the links using the .nav-icon class
           			     with font-awesome or any other icon font library -->
-						<li class="nav-item">
-							<a href="index" class="nav-link <c:if test = "${menu eq 'dashboard'}">active</c:if>">
-						<i class="nav-icon fas fa-tachometer-alt"></i>
-							<p>Dashboard</p>
-						</a></li>
-						<li class="nav-item">
-							<a href="outlet" class="nav-link <c:if test = "${menu eq 'outlet'}">active</c:if>">
-						<i class="nav-icon fas fa-store"></i>
-								<p>Outlet</p>
-						</a></li>
-						<li class="nav-item">
-							<a href="product" class="nav-link <c:if test = "${menu eq 'product'}">active</c:if>">
-						<i class="nav-icon fas fa-boxes"></i>
-								<p>
-									Product <span class="right badge badge-danger">New</span>
-								</p>
-						</a></li>
-						<li class="nav-item has-treeview"><a href="#"
-							class="nav-link"> <i class="nav-icon fas fa-ticket-alt"></i>
-								<p>
-									Voucher <i class="fas fa-angle-left right"></i>
-								</p>
-						</a>
-							<ul class="nav nav-treeview">
-								<li class="nav-item"><a href="voucher"
-									class="nav-link <c:if test = "${menu eq 'voucher'}">active</c:if>"> <i class="far fa-circle nav-icon"></i>
-										<p>Manage Voucher</p>
-								</a></li>
-								<li class="nav-item"><a href="published"
-									class="nav-link <c:if test = "${menu eq 'published'}">active</c:if>"> <i class="far fa-circle nav-icon"></i>
-										<p>Published Voucher</p>
-								</a></li>
-							</ul></li>
-
+						
+						${menu}
+					
 					</ul>
 				</nav>
 				<!-- /.sidebar-menu -->

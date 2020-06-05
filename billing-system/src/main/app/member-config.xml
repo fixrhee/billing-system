@@ -63,6 +63,26 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
 	</flow>
 
+	<flow name="member-getByUsernameFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/username/{username}" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter doc:name="And">
+				<expression-filter
+					expression="#[message.inboundProperties.'http.uri.params'.username != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<invoke method="getMemberByUsername"
+			methodArguments="#[message.inboundProperties.'http.uri.params'.username], #[flowVars['token']]"
+			object-ref="MemberServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
 	<flow name="member-getAllFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
 			path="member" allowedMethods="GET" doc:name="HTTP" />
@@ -82,6 +102,46 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		<invoke method="getAllMember"
 			methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[flowVars['token']]"
 			object-ref="MemberServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="member-getByBillingFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/billing" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.currentPage != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.pageSize != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.billingID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<choice>
+			<when
+				expression="#[message.inboundProperties.'http.query.params'.reduce == null]">
+				<invoke method="getMemberByBilling"
+					methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[message.inboundProperties.'http.query.params'.billingID], #[flowVars['token']]"
+					object-ref="MemberServiceImpl" doc:name="Invoke" />
+			</when>
+			<when
+				expression="#[message.inboundProperties.'http.query.params'.reduce == 'true']">
+				<invoke method="getMemberByBillingReduce"
+					methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[message.inboundProperties.'http.query.params'.billingID], #[flowVars['token']]"
+					object-ref="MemberServiceImpl" doc:name="Invoke" />
+			</when>
+			<otherwise>
+				<invoke method="getMemberByBilling"
+					methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[message.inboundProperties.'http.query.params'.billingID], #[flowVars['token']]"
+					object-ref="MemberServiceImpl" doc:name="Invoke" />
+			</otherwise>
+		</choice>
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
 	</flow>
 
@@ -146,6 +206,21 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			methodArguments="#[message.inboundProperties.'http.uri.params'.memberID], #[flowVars['token']]"
 			object-ref="MemberServiceImpl" doc:name="Invoke" />
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="member-menuFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="member/menu" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<expression-filter expression="#[flowVars['token'] != null]" />
+		</message-filter>
+		<invoke method="getMenu" methodArguments="#[flowVars['token']]"
+			object-ref="MemberServiceImpl" />
+		<flow-ref name="responseFlow" />
 	</flow>
 
 </mule>

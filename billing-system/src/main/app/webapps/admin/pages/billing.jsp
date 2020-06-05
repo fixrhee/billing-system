@@ -13,18 +13,19 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Outlet</h1>
+            <h1>Billing</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="index">Home</a></li>
-              <li class="breadcrumb-item active">Outlet</li>
+              <li class="breadcrumb-item active">Billing</li>
             </ol>
           </div>
         </div>
-        <div align="right">
-        		<button type="button" class="btn btn-primary" onclick="window.location.href='createOutlet';">Create New Outlet</button>
+            <div align="right">
+        		<button type="button" class="btn btn-primary" onclick="window.location.href='createBilling';">Create New Billing</button>
         </div>
+   
       </div><!-- /.container-fluid -->
     </section>
 
@@ -33,13 +34,19 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
+            <div class="card-header">
+              <h3 class="card-title">Billing List</h3>
+            </div>
+   
             <!-- /.card-header -->
             <div class="card-body">
-              <table id="example2" class="table table-bordered table-striped">
+              <table id="billingTable" class="table table-bordered table-striped responsive nowrap">
                 <thead>
                 <tr>
                   <th>Name</th>
-                  <th>Address</th>
+                  <th>Description</th>
+                  <th>Cycle</th>
+                  <th>Outstanding</th>
                   <th>Created Date</th>
                   <th>Action</th>
                 </tr>
@@ -63,24 +70,30 @@
 		<!-- /.footer -->
 		
 <script>
- 		$("#example2")
+ 		$("#billingTable")
 				.DataTable(
 					{
 					 "processing" : true,
        				 "serverSide" : true,
+       				 "bFilter": false,
        			     "ajax" : {
-       					 "url" : "viewOutlet"
+       					 "url" : "billingData"
  		              },
  			     	 "columns" : [{
 								"data" : "name"
 							}, {
-								"data" : "address"
+								"data" : "description"
+							}, {
+								"data" : "billingCycle"
+							}, {
+								"data" : "outstanding"
 							}, {
 								"data" : "createdDate"
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-                   					 return "<a href='editOutlet?id=" + data + "' class='btn btn-info btn-xs'><i class='fa fa-arrow-circle-right' aria-hidden='true'></i> Edit</a>";
+                   					 return "<a href='editOutlet?id=" + data + "' class='btn btn-info btn-xs'><i class='fas fa-edit' aria-hidden='true'></i> Edit</a> " +
+               					 			"<a href='createInvoice?billingID=" + data + "' class='btn btn-success btn-xs'><i class='far fa-plus-square' aria-hidden='true'></i> Add Invoice</a>";
                					 }	
 							}]
 					});
@@ -98,6 +111,5 @@
 	});
 	</script>
 </c:if>
-
 </body>
 </html>

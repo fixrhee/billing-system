@@ -5,6 +5,8 @@ import java.util.Date;
 
 public class PublishInvoice {
 
+	private Integer id;
+	private Integer invoiceID;
 	private Billing billing;
 	private Member biller;
 	private Member member;
@@ -76,6 +78,22 @@ public class PublishInvoice {
 
 	public void setBiller(Member biller) {
 		this.biller = biller;
+	}
+
+	public Integer getId() {
+		return id;
+	}
+
+	public void setId(Integer id) {
+		this.id = id;
+	}
+
+	public Integer getInvoiceID() {
+		return invoiceID;
+	}
+
+	public void setInvoiceID(Integer invoiceID) {
+		this.invoiceID = invoiceID;
 	}
 
 }

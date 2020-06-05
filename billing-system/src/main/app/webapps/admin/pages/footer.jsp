@@ -1,6 +1,6 @@
 <footer class="main-footer">
 			Copyright &copy; 2020 <a
-				href="http://jatelindo.com">Jatelindo Perkasa Abadi</a>.
+				href="http://google.com">PT. Tagihan Pintar Nusantara</a>.
 			 All rights reserved.
 			<div class="float-right d-none d-sm-inline-block">
 				<b>Version</b> 1.0.0
@@ -27,6 +27,7 @@
 	<script src="plugins/bootstrap/js/bootstrap.bundle.min.js"></script>
 	<!-- ChartJS -->
 	<script src="plugins/chart.js/Chart.min.js"></script>
+	
 	<!-- Sparkline -->
 	<script src="plugins/sparklines/sparkline.js"></script>
 	<!-- JQVMap -->
@@ -49,12 +50,17 @@
 	<script src="plugins/datatables/jquery.dataTables.min.js"></script>
 	<script src="plugins/datatables-bs4/js/dataTables.bootstrap4.min.js"></script>
 	<script src="plugins/datatables-responsive/js/dataTables.responsive.min.js"></script>
-	<script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>		
+	<script src="plugins/datatables-responsive/js/responsive.bootstrap4.min.js"></script>	
+	<script src="plugins/datatables/dataTables.checkboxes.js"></script>	
 	<!-- AdminLTE App -->
 	<script src="dist/js/adminlte.js"></script>
-	<!-- AdminLTE dashboard demo (This is only for demo purposes) -->
-	<script src="dist/js/pages/dashboard.js"></script>
-	<!-- AdminLTE for demo purposes -->
-	<script src="dist/js/demo.js"></script>
 	 <!-- PNotify -->
     <script src="plugins/pnotify/dist/pnotify.custom.min.js"></script>	
+    <!-- Smart Wizard -->
+    <script type="text/javascript" src="plugins/wizard/jquery.smartWizard.min.js"></script>
+    <!-- Dynamic Form -->
+	<script type="text/javascript" src="plugins/dynamicform/dynamic-form.js"></script>
+	<!-- Bootstrap4 Duallistbox -->
+	<script src="plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+	
+    

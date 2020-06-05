@@ -12,8 +12,10 @@ import java.util.List;
 import java.util.Map;
 
 import javax.sql.DataSource;
-
+import org.billing.api.data.ChildMenu;
+import org.billing.api.data.Group;
 import org.billing.api.data.Member;
+import org.billing.api.data.ParentMenu;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.dao.DataAccessException;
 import org.springframework.dao.EmptyResultDataAccessException;
@@ -27,6 +29,9 @@ import org.springframework.jdbc.support.KeyHolder;
 import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Repository;
 
+import com.google.common.collect.ArrayListMultimap;
+import com.google.common.collect.Multimap;
+
 @Component
 @Repository
 public class MemberRepository {
@@ -36,10 +41,13 @@ public class MemberRepository {
 	public Member validateAccess(String username, String secret) {
 		try {
 			Member member = this.jdbcTemplate.queryForObject(
-					"SELECT id, username, name, email, password, msisdn, address, id_card, active, created_date FROM member WHERE username = ? AND password = MD5(?);",
+					"SELECT id, group_id, username, name, email, password, msisdn, address, id_card, active, created_date FROM member WHERE username = ? AND password = MD5(?);",
 					new Object[] { username, secret }, new RowMapper<Member>() {
 						public Member mapRow(ResultSet rs, int arg1) throws SQLException {
 							Member member = new Member();
+							Group group = new Group();
+							group.setId(rs.getInt("group_id"));
+							member.setGroup(group);
 							member.setId(rs.getInt("id"));
 							member.setName(rs.getString("name"));
 							member.setEmail(rs.getString("email"));
@@ -62,10 +70,13 @@ public class MemberRepository {
 	public Member getMemberByID(Object id) {
 		try {
 			Member member = this.jdbcTemplate.queryForObject(
-					"SELECT id, username, name, email, password, msisdn, address, id_card, active, created_date FROM member WHERE id = ?;",
+					"SELECT id, group_id, username, name, email, password, msisdn, address, id_card, active, created_date FROM member WHERE id = ?;",
 					new Object[] { id }, new RowMapper<Member>() {
 						public Member mapRow(ResultSet rs, int arg1) throws SQLException {
 							Member member = new Member();
+							Group group = new Group();
+							group.setId(rs.getInt("group_id"));
+							member.setGroup(group);
 							member.setId(rs.getInt("id"));
 							member.setName(rs.getString("name"));
 							member.setEmail(rs.getString("email"));
@@ -88,10 +99,13 @@ public class MemberRepository {
 	public Member getMemberByUsername(String username) {
 		try {
 			Member member = this.jdbcTemplate.queryForObject(
-					"SELECT id, username, name, email, password, msisdn, address, id_card, active, created_date FROM member WHERE username = ?;",
+					"SELECT id, group_id, username, name, email, password, msisdn, address, id_card, active, created_date FROM member WHERE username = ?;",
 					new Object[] { username }, new RowMapper<Member>() {
 						public Member mapRow(ResultSet rs, int arg1) throws SQLException {
 							Member member = new Member();
+							Group group = new Group();
+							group.setId(rs.getInt("group_id"));
+							member.setGroup(group);
 							member.setId(rs.getInt("id"));
 							member.setName(rs.getString("name"));
 							member.setEmail(rs.getString("email"));
@@ -136,6 +150,9 @@ public class MemberRepository {
 				HashMap<Integer, Member> mapRet = new HashMap<Integer, Member>();
 				while (rs.next()) {
 					Member member = new Member();
+					Group group = new Group();
+					group.setId(rs.getInt("group_id"));
+					member.setGroup(group);
 					member.setId(rs.getInt("id"));
 					member.setName(rs.getString("name"));
 					member.setEmail(rs.getString("email"));
@@ -164,6 +181,9 @@ public class MemberRepository {
 				List<Member> listRet = new LinkedList<Member>();
 				while (rs.next()) {
 					Member member = new Member();
+					Group group = new Group();
+					group.setId(rs.getInt("group_id"));
+					member.setGroup(group);
 					member.setId(rs.getInt("id"));
 					member.setName(rs.getString("name"));
 					member.setEmail(rs.getString("email"));
@@ -202,6 +222,63 @@ public class MemberRepository {
 			}
 		}, holder);
 		return holder.getKey().intValue();
+	}
+
+	public List<ParentMenu> getMenu(int id) {
+		try {
+			List<ParentMenu> pm = this.jdbcTemplate.query(
+					"SELECT m.id, m.sequence, m.link, m.name, m.icon, m.badge FROM menu_parent m inner join menu_permission p on m.id = p.menu_parent_id WHERE p.group_id = ? order by m.sequence asc;",
+					new Object[] { id }, new RowMapper<ParentMenu>() {
+						public ParentMenu mapRow(ResultSet rs, int arg1) throws SQLException {
+							ParentMenu pm = new ParentMenu();
+							pm.setIcon(rs.getString("icon"));
+							pm.setBadge(rs.getString("badge"));
+							pm.setId(rs.getInt("id"));
+							pm.setLink(rs.getString("link"));
+							pm.setName(rs.getString("name"));
+							pm.setSequence(rs.getInt("sequence"));
+							return pm;
+						}
+					});
+			return pm;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	public Multimap<Integer, ChildMenu> getMenuMultiMap(List<Integer> ids) {
+		String sql = "select * from menu_child where menu_parent_id in (:menuID) order by sequence asc";
+		Map<String, List<Integer>> paramMap = Collections.singletonMap("menuID", ids);
+		NamedParameterJdbcTemplate template = new NamedParameterJdbcTemplate(this.jdbcTemplate.getDataSource());
+		Multimap<Integer, ChildMenu> mapRet = template.query(sql, paramMap,
+				new ResultSetExtractor<Multimap<Integer, ChildMenu>>() {
+					@Override
+					public Multimap<Integer, ChildMenu> extractData(ResultSet rs)
+							throws SQLException, DataAccessException {
+						Multimap<Integer, ChildMenu> map = ArrayListMultimap.create();
+						while (rs.next()) {
+							ChildMenu cm = new ChildMenu();
+							cm.setId(rs.getInt("id"));
+							cm.setLink(rs.getString("link"));
+							cm.setName(rs.getString("name"));
+							cm.setParentID(rs.getInt("menu_parent_id"));
+							cm.setSequence(rs.getInt("sequence"));
+							map.put(rs.getInt("menu_parent_id"), cm);
+						}
+						return map;
+					}
+				});
+		return mapRet;
+	}
+
+	public String getWelcomeMenu(int groupID) {
+		try {
+			String wm = this.jdbcTemplate.queryForObject("SELECT link FROM menu_welcome WHERE group_id = ?;",
+					new Object[] { groupID }, String.class);
+			return wm;
+		} catch (EmptyResultDataAccessException ex) {
+			return null;
+		}
 	}
 
 	public void createMembership(int memberID, int billerID, int sequence) {
@@ -254,5 +331,22 @@ public class MemberRepository {
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);
 	}
+
+	public List<Integer> getMemberByBilling(int pageSize, int rowNum, Integer billingID, Integer billerID) {
+		try {
+			List<Integer> mid = this.jdbcTemplate.query(
+					"SELECT member_id FROM invoice WHERE billing_id = ? AND biller_id = ? ORDER BY id DESC LIMIT ?,?;",
+					new Object[] { billingID, billerID, pageSize, rowNum }, new RowMapper<Integer>() {
+						public Integer mapRow(ResultSet rs, int arg1) throws SQLException {
+							return rs.getInt("member_id");
+						}
+					});
+			return mid;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+	
+	
 
 }

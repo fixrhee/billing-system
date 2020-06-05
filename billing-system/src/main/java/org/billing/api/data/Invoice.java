@@ -9,6 +9,7 @@ public class Invoice {
 	private Billing billing;
 	private Member biller;
 	private Member member;
+	private PublishInvoice publishInvoice;
 	private String invoiceNumber;
 	private BigDecimal amount;
 	private Boolean active;
@@ -76,6 +77,14 @@ public class Invoice {
 
 	public void setBiller(Member biller) {
 		this.biller = biller;
+	}
+
+	public PublishInvoice getPublishInvoice() {
+		return publishInvoice;
+	}
+
+	public void setPublishInvoice(PublishInvoice publishInvoice) {
+		this.publishInvoice = publishInvoice;
 	}
 
 }

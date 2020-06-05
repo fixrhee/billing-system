@@ -1,12 +1,17 @@
 package org.billing.api.processor;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.codec.digest.DigestUtils;
+import org.billing.api.data.Billing;
+import org.billing.api.data.ChildMenu;
 import org.billing.api.data.Group;
 import org.billing.api.data.Member;
+import org.billing.api.data.ParentMenu;
 import org.billing.api.data.SessionToken;
 import org.billing.api.data.Status;
 import org.billing.api.data.TransactionException;
@@ -17,6 +22,7 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.JWTVerifier;
 import com.auth0.jwt.algorithms.Algorithm;
 import com.auth0.jwt.interfaces.DecodedJWT;
+import com.google.common.collect.Multimap;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
 
@@ -25,6 +31,8 @@ public class MemberProcessor {
 
 	@Autowired
 	private MemberRepository memberRepository;
+	@Autowired
+	private BillingRepository billingRepository;
 	@Autowired
 	private HazelcastInstance hazelcastInstance;
 
@@ -54,6 +62,23 @@ public class MemberProcessor {
 		}
 		Member lacq = memberRepository.getMemberByID(id);
 		return lacq;
+	}
+
+	public Member getMemberByUsername(String username, String token) throws TransactionException {
+		Member b = this.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+
+		Member m = memberRepository.getMemberByUsername(username);
+		if (m == null) {
+			throw new TransactionException(Status.MEMBER_NOT_FOUND);
+		}
+		Integer mid = memberRepository.getMembershipID(m.getId(), b.getId());
+		if (mid == 0) {
+			throw new TransactionException(Status.MEMBER_NOT_FOUND);
+		}
+		return m;
 	}
 
 	public void createMember(Member member, String token) throws TransactionException {
@@ -161,4 +186,59 @@ public class MemberProcessor {
 		return lacq;
 	}
 
+	public Map<String, Object> getMemberMenu(String token) throws TransactionException {
+		Member b = this.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+
+		Map<String, Object> mm = new HashMap<String, Object>();
+		List<ParentMenu> lp = memberRepository.getMenu(b.getGroup().getId());
+		List<ParentMenu> copyLp = new ArrayList<>();
+		List<Integer> ids = new LinkedList<Integer>();
+		for (int i = 0; i < lp.size(); i++) {
+			ids.add(lp.get(i).getId());
+		}
+
+		Multimap<Integer, ChildMenu> mc = memberRepository.getMenuMultiMap(ids);
+		for (int i = 0; i < lp.size(); i++) {
+			ParentMenu pm = lp.get(i);
+			pm.setChildMenu(mc.get(pm.getId()));
+			copyLp.add(pm);
+		}
+		mm.put("menu", copyLp);
+		mm.put("welcomeMenu", memberRepository.getWelcomeMenu(b.getGroup().getId()));
+		return mm;
+	}
+
+	public Map<String, Object> getMemberByBilling(int currentPage, int pageSize, String id, String token,
+			boolean negate) throws TransactionException {
+		Map<String, Object> mm = new HashMap<String, Object>();
+		Member b = this.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		Billing lacq = billingRepository.getBillingByID(id, b.getId());
+		if (lacq == null) {
+			throw new TransactionException(Status.BILLING_NOT_FOUND);
+		}
+		
+		Integer count = memberRepository.totalMember(b.getId());
+		List<Member> lMap = new LinkedList<Member>();
+		if (negate == false) {
+			List<Integer> ids = memberRepository.getMemberByBilling(currentPage, pageSize, lacq.getId(), b.getId());
+			lMap = memberRepository.getMemberInList(ids);
+			mm.put("totalRecord", count);
+		} else {
+			List<Integer> ids = memberRepository.getMemberByBilling(currentPage, pageSize, lacq.getId(), b.getId());
+			List<Integer> ida = memberRepository.getAllMember(currentPage, pageSize, b.getId());
+			ida.removeAll(ids);
+			lMap = memberRepository.getMemberInList(ida);
+			mm.put("totalRecord", count);
+			mm.put("filteredRecord", ida.size());
+		}
+
+		mm.put("body", lMap);
+		return mm;
+	}
 }

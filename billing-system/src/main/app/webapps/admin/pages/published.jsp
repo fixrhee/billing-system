@@ -13,16 +13,16 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Published Voucher</h1>
+            <h1>Published Invoice</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="index">Home</a></li>
-              <li class="breadcrumb-item active">Voucher</li>
-              <li class="breadcrumb-item active">Published Voucher</li>
+              <li class="breadcrumb-item active">Published Invoice</li>
             </ol>
           </div>
         </div>
+   
       </div><!-- /.container-fluid -->
     </section>
 
@@ -31,16 +31,20 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
-        
+            <div class="card-header">
+              <h3 class="card-title">Published Invoice List</h3>
+            </div>
             <!-- /.card-header -->
             <div class="card-body">
               <table id="example2" class="table table-bordered table-striped">
                 <thead>
                 <tr>
+                  <th>Invoice Number</th>
                   <th>Name</th>
-                  <th>Serial No</th>
+                  <th>Billing</th>
+                  <th>Amount</th>
+                  <th>Payment Code</th>
                   <th>Status</th>
-                  <th>Publish Date</th>
                   <th>Action</th>
                 </tr>
                 </thead>
@@ -69,24 +73,41 @@
 					 "processing" : true,
        				 "serverSide" : true,
        			     "ajax" : {
-       					 "url" : "viewPublished"
+       					 "url" : "publishedData"
  		              },
  			     	 "columns" : [{
+								"data" : "invoiceNo"
+							}, {
 								"data" : "name"
 							}, {
-								"data" : "uid"
+								"data" : "billing"
+							}, {
+								"data" : "amount"
+							}, {
+								"data" : "paymentCode"
 							}, {
 								"data" : "status"
 							}, {
-								"data" : "publishDate"
-							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-                   					 return "<a href='detailPublished?id=" + data + "' class='btn btn-primary btn-xs'><i class='fa fa-arrow-circle-right' aria-hidden='true'></i> Detail</a>"
+                   					  return "<a href='editOutlet?id=" + data + "' class='btn btn-info btn-xs'><i class='fas fa-info-circle' aria-hidden='true'></i> Detail </a> " + 
+                   					 " <a href='editOutlet?id=" + data + "' class='btn btn-success btn-xs'><i class='fas fa-edit' aria-hidden='true'></i> Edit</a> ";
                					 }	
 							}]
 					});
 	</script>
 
+<c:if test="${not empty fn:trim(notification)}">	
+	<script type="text/javascript">
+	$(function(){
+ 	 new PNotify({
+        title: '${title}',
+        text: '${message}',
+        type: '${notification}',
+        styling: 'bootstrap3'
+        });
+	});
+	</script>
+</c:if>
 </body>
 </html>

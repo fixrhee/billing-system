@@ -14,6 +14,16 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			class="org.billing.api.handler.TransactionHandler" />
 	</spring:beans>
 
+
+	<flow name="testFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="test" allowedMethods="POST" doc:name="HTTP" />
+			<logger level="INFO" doc:name="Logger"/>
+			<logger level="INFO" message="#[payload]" doc:name="Logger"/>
+			<logger level="INFO" message="#[payload.'dynamic_form[dynamic_form][0][item]']" doc:name="Logger"/>
+			<set-payload value="OK" doc:name="Set Payload"/>
+	</flow>
+
 	<flow name="transaction-balanceInqFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
 			path="transaction/balanceInquiry" allowedMethods="GET" doc:name="HTTP" />

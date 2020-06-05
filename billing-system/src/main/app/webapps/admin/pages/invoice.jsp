@@ -13,17 +13,14 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Product</h1>
+            <h1>Invoice</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="index">Home</a></li>
-              <li class="breadcrumb-item active">Product</li>
+              <li class="breadcrumb-item active">Invoice</li>
             </ol>
           </div>
-        </div>
-            <div align="right">
-        		<button type="button" class="btn btn-primary" onclick="window.location.href='createProduct';">Create New Product</button>
         </div>
    
       </div><!-- /.container-fluid -->
@@ -34,15 +31,20 @@
       <div class="row">
         <div class="col-12">
           <div class="card">
-        
+            <div class="card-header">
+              <h3 class="card-title">Invoice List</h3>
+              <div align="right"><%= (new java.util.Date()).toLocaleString()%></div>
+            </div>
             <!-- /.card-header -->
             <div class="card-body">
-              <table id="example2" class="table table-bordered table-striped">
+              <table id="example2" class="table table-bordered table-striped responsive nowrap">
                 <thead>
                 <tr>
+                  <th>Invoice Number</th>
                   <th>Name</th>
-                  <th>Description</th>
-                  <th>Created Date</th>
+                  <th>Billing</th>
+                  <th>Amount</th>
+                  <th>Status</th>
                   <th>Action</th>
                 </tr>
                 </thead>
@@ -71,18 +73,23 @@
 					 "processing" : true,
        				 "serverSide" : true,
        			     "ajax" : {
-       					 "url" : "viewProduct"
+       					 "url" : "invoiceData"
  		              },
  			     	 "columns" : [{
+								"data" : "invoiceNo"
+							}, {
 								"data" : "name"
 							}, {
-								"data" : "description"
+								"data" : "billing"
 							}, {
-								"data" : "createdDate"
+								"data" : "amount"
+							}, {
+								"data" : "status"
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-                   					 return "<a href='editOutlet?id=" + data + "' class='btn btn-info btn-xs'><i class='fa fa-arrow-circle-right' aria-hidden='true'></i> Edit</a>";
+                   					  return "<a href='editOutlet?id=" + data + "' class='btn btn-info btn-xs'><i class='fas fa-info-circle' aria-hidden='true'></i> Detail </a> " + 
+                   					 " <a href='editOutlet?id=" + data + "' class='btn btn-success btn-xs'><i class='fas fa-edit' aria-hidden='true'></i> Edit</a> ";
                					 }	
 							}]
 					});

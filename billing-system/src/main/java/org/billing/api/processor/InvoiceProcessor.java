@@ -1,6 +1,7 @@
 package org.billing.api.processor;
 
 import java.math.BigDecimal;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.LinkedList;
@@ -46,16 +47,25 @@ public class InvoiceProcessor {
 		}
 
 		List<Integer> ids = new LinkedList<Integer>();
+		List<Integer> idb = new LinkedList<Integer>();
+		List<Integer> idi = new LinkedList<Integer>();
 		for (int i = 0; i < lacq.size(); i++) {
 			ids.add(lacq.get(i).getMember().getId());
+			idb.add(lacq.get(i).getBilling().getId());
+			idi.add(lacq.get(i).getId());
 		}
 
 		List<Invoice> li = new ArrayList<Invoice>(lacq);
 		Map<Integer, Member> pm = memberRepository.getMemberInMap(ids);
+		Map<Integer, Billing> pb = billingRepository.getBillingInMap(idb);
+		LocalDate today = LocalDate.now();
+		int month = today.getMonthValue();
+		Map<Integer, PublishInvoice> pi = invoiceRepository.getPublishInvoiceDateInMap(month, idi);
 		for (int i = 0; i < lacq.size(); i++) {
 			li.get(i).setMember(pm.get(lacq.get(i).getMember().getId()));
+			li.get(i).setBilling(pb.get(lacq.get(i).getBilling().getId()));
+			li.get(i).setPublishInvoice(pi.get(lacq.get(i).getId()));
 		}
-
 		Integer count = invoiceRepository.totalInvoice(b.getId());
 		mm.put("body", li);
 		mm.put("totalRecord", count);
@@ -72,6 +82,8 @@ public class InvoiceProcessor {
 			throw new TransactionException(Status.INVOICE_NOT_FOUND);
 		}
 		Member m = memberRepository.getMemberByID(lacq.getMember().getId());
+		PublishInvoice pi = invoiceRepository.getPublishInvoiceByInvoice(lacq.getId(), b.getId());
+		lacq.setPublishInvoice(pi);
 		lacq.setMember(m);
 		return lacq;
 	}
@@ -86,11 +98,47 @@ public class InvoiceProcessor {
 			throw new TransactionException(Status.INVOICE_NOT_FOUND);
 		}
 		Member m = memberRepository.getMemberByID(lacq.getMember().getId());
+		PublishInvoice pi = invoiceRepository.getPublishInvoiceByInvoice(lacq.getId(), b.getId());
+		Billing bi = billingRepository.getBillingByID(lacq.getBilling().getId(), b.getId());
+		lacq.setPublishInvoice(pi);
 		lacq.setMember(m);
+		lacq.setBilling(bi);
 		return lacq;
 	}
 
 	public void createInvoice(Invoice inv, String token) throws TransactionException {
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		Billing lacq = billingRepository.getBillingByID(inv.getBilling().getId(), b.getId());
+		if (lacq == null) {
+			throw new TransactionException(Status.BILLING_NOT_FOUND);
+		}
+		Integer mid = memberRepository.getMembershipID(inv.getMember().getId(), b.getId());
+		if (mid == 0) {
+			throw new TransactionException(Status.MEMBER_NOT_FOUND);
+		}
+
+		Member m = memberRepository.getMemberByID(inv.getMember().getId());
+		IMap<String, String> mapLock = hazelcastInstance.getMap("MemberLock");
+		mapLock.lock(String.valueOf(b.getId()) + String.valueOf(m.getId()));
+
+		Integer memberInvoice = invoiceRepository.countMemberInvoice(b.getId(), m.getId()) + 1;
+		if (memberInvoice == 99) {
+			throw new TransactionException(Status.MEMBER_INVOICE_LIMIT);
+		}
+		Integer memberSequence = memberRepository.getMembershipSequence(m.getId(), b.getId());
+		String invoiceNumber = StringUtils.leftPad(String.valueOf(memberSequence), 2, '0')
+				+ StringUtils.leftPad(String.valueOf(memberInvoice), 2, '0')
+				+ StringUtils.leftPad(m.getUsername().substring(4), 9, '0');
+		inv.setInvoiceNumber(invoiceNumber);
+		inv.setBiller(b);
+		invoiceRepository.createInvoice(inv, b.getId());
+		mapLock.unlock(String.valueOf(b.getId()) + String.valueOf(m.getId()));
+	}
+	
+	public void createBatchInvoice(Invoice inv, String token) throws TransactionException {
 		Member b = memberProcessor.Authenticate(token);
 		if (b == null) {
 			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
@@ -182,5 +230,4 @@ public class InvoiceProcessor {
 		mm.put("totalRecord", count);
 		return mm;
 	}
-
 }
