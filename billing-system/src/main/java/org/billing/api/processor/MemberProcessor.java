@@ -1,10 +1,12 @@
 package org.billing.api.processor;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.codec.digest.DigestUtils;
 import org.billing.api.data.Billing;
@@ -222,7 +224,7 @@ public class MemberProcessor {
 		if (lacq == null) {
 			throw new TransactionException(Status.BILLING_NOT_FOUND);
 		}
-		
+
 		Integer count = memberRepository.totalMember(b.getId());
 		List<Member> lMap = new LinkedList<Member>();
 		if (negate == false) {
@@ -230,14 +232,26 @@ public class MemberProcessor {
 			lMap = memberRepository.getMemberInList(ids);
 			mm.put("totalRecord", count);
 		} else {
-			List<Integer> ids = memberRepository.getMemberByBilling(currentPage, pageSize, lacq.getId(), b.getId());
-			List<Integer> ida = memberRepository.getAllMember(currentPage, pageSize, b.getId());
-			ida.removeAll(ids);
-			lMap = memberRepository.getMemberInList(ida);
-			mm.put("totalRecord", count);
-			mm.put("filteredRecord", ida.size());
-		}
+			List<Member> memberBill = new LinkedList<Member>();
+			List<Integer> idm = memberRepository.getAllMember(currentPage, pageSize, b.getId());
+			List<Member> lm = memberRepository.getMemberInList(idm);
+			Map<Integer, String> memberBilling = memberRepository.getAllMemberIDByBilling(lacq.getId(), b.getId());
 
+			for (int i = 0; i < lm.size(); i++) {
+				if (memberBilling.containsKey(lm.get(i).getId())) {
+					lm.get(i).setDescription("UNAVAILABLE");
+					memberBill.add(lm.get(i));
+				} else {
+					lm.get(i).setDescription("AVAILABLE");
+					memberBill.add(lm.get(i));
+				}
+			}
+
+			List<Member> sortedBill = memberBill.stream().sorted(Comparator.comparing(Member::getDescription))
+					.collect(Collectors.toList());
+			lMap = sortedBill;
+			mm.put("totalRecord", count);
+		}
 		mm.put("body", lMap);
 		return mm;
 	}

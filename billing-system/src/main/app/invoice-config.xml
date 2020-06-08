@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<mule xmlns:json="http://www.mulesoft.org/schema/mule/json"
+<mule xmlns:vm="http://www.mulesoft.org/schema/mule/vm" xmlns:json="http://www.mulesoft.org/schema/mule/json"
 	xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns="http://www.mulesoft.org/schema/mule/core"
 	xmlns:doc="http://www.mulesoft.org/schema/mule/documentation"
 	xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
-	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
+	xsi:schemaLocation="http://www.mulesoft.org/schema/mule/vm http://www.mulesoft.org/schema/mule/vm/current/mule-vm.xsd http://www.mulesoft.org/schema/mule/json http://www.mulesoft.org/schema/mule/json/current/mule-json.xsd
 http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
 http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
 http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd">
@@ -96,30 +96,56 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			object-ref="InvoiceServiceImpl" doc:name="Invoke" />
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
 	</flow>
-	
+
 	<flow name="invoice-bulkCreateFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
 			path="invoice/bulk" allowedMethods="POST" doc:name="HTTP" />
 		<set-variable
 			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
 			variableName="token" doc:name="Variable" />
-			<logger level="INFO"/>
-			<logger level="INFO" message="#[payload]"/>
-		<!-- message-filter onUnaccepted="invalidParameterFlow"
+		<message-filter onUnaccepted="invalidParameterFlow"
 			doc:name="Message">
 			<and-filter>
-				<expression-filter expression="#[payload.billingID != null]" />
-				<expression-filter expression="#[payload.memberID != null]" />
-				<expression-filter expression="#[payload.amount != null]" />
+				<expression-filter expression="#[json:billingID != null]" />
+				<expression-filter expression="#[json:members != null]" />
+				<expression-filter expression="#[json:amount != null]" />
+				<expression-filter expression="#[json:description != null]" />
 				<expression-filter expression="#[flowVars['token'] != null]" />
 			</and-filter>
 		</message-filter>
-		<custom-transformer class="org.billing.api.processor.InvoiceTransformer"
-			doc:name="Java" />
+		<invoke method="createBulkInvoice"
+			methodArguments="#[json:billingID], #[json:members], #[json:amount], #[json:description], #[flowVars['token']]"
+			object-ref="InvoiceServiceImpl" doc:name="Invoke" />
+		<set-property propertyName="token" value="#[flowVars['token']]"
+			doc:name="AddHeader" />
+		<vm:outbound-endpoint path="bulkCreateInvoicePhase01" />
+		<set-payload value="OK" />
+	</flow>
+
+	<flow name="invoice-bulkCreatePhaseFlow">
+		<vm:inbound-endpoint path="bulkCreateInvoicePhase01" />
+		<set-variable value="#[message.inboundProperties.token]"
+			variableName="token" doc:name="Variable" />
+		<collection-splitter />
+		<set-property propertyName="token" value="#[flowVars['token']]"
+			doc:name="AddHeader" />
+		<vm:outbound-endpoint path="bulkCreateInvoicePhase02" />
+	</flow>
+
+	<flow name="invoice-bulkCreatePhase2Flow">
+		<vm:inbound-endpoint path="bulkCreateInvoicePhase02" />
+		<set-variable value="#[message.inboundProperties.token]"
+			variableName="token" doc:name="Variable" />
+		<set-variable value="#[payload]" variableName="originalPayload"
+			doc:name="Variable" />
 		<invoke method="createInvoice" methodArguments="#[payload], #[flowVars['token']]"
 			object-ref="InvoiceServiceImpl" doc:name="Invoke" />
-		<flow-ref name="responseFlow" doc:name="Flow Reference" / -->
-		
+		<catch-exception-strategy doc:name="Catch Exception Strategy">
+			<logger level="ERROR"
+				message="#[groovy:message.getExceptionPayload().getRootException().getMessage()]" />
+			<logger level="ERROR"
+				message="[FAILED Create Invoice for MemberID : #[flowVars['originalPayload'].member.id]]" />
+		</catch-exception-strategy>
 	</flow>
 
 	<flow name="invoice-updateFlow">

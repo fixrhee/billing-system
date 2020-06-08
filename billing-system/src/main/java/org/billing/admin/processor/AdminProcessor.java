@@ -16,6 +16,7 @@ import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.client.utils.URIBuilder;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
@@ -217,21 +218,17 @@ public class AdminProcessor {
 		return new JSONObject(result);
 	}
 
-	public String createInvoice(String token, String billingID, String billerID, String[] memberID, String amount)
+	public String createInvoice(String token, String json)
 			throws MalformedURLException, IOException, URISyntaxException {
 		String result = "";
 		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/invoice/bulk");
 		HttpPost post = new HttpPost(builder.build());
 		post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
-		List<NameValuePair> params = new ArrayList<NameValuePair>();
-		params.add(new BasicNameValuePair("billingID", billingID));
-		params.add(new BasicNameValuePair("billerID", billerID));
-		params.add(new BasicNameValuePair("amount", amount));
+		post.setHeader("Accept", "application/json");
+		post.setHeader("Content-type", "application/json");
 
-		for (int i = 0; i < memberID.length; i++) {
-			params.add(new BasicNameValuePair("member", memberID[i]));
-		}
-		post.setEntity(new UrlEncodedFormEntity(params));
+		StringEntity entity = new StringEntity(json);
+		post.setEntity(entity);
 
 		try (CloseableHttpClient httpClient = HttpClients.createDefault();
 				CloseableHttpResponse response = httpClient.execute(post)) {

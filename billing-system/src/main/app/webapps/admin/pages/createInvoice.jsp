@@ -37,7 +37,7 @@
             <!-- /.card-header -->
             <div class="card-body">
             <form id="frm-invoice" action="submitInvoice" method="POST">
-        		<label>Invoice Item and amount</label>
+        		<label>Invoice Item and Amount</label>
    			 <div class="form-group">
                 <div class="row">
 	                <div class="col-md-6">
@@ -82,6 +82,13 @@
 	                </div>
 	            </div>
           	  </div>
+          	     <div class="form-group">
+                   <div class="custom-control custom-switch">
+                      <input type="checkbox" class="custom-control-input" id="customSwitch1">
+                      <label class="custom-control-label" for="customSwitch1">Save Item</label>
+                    </div>
+                  </div>
+            
           	  <div class="form-group">
                 <div class="row">
 	                <div class="col-md-6">
@@ -96,15 +103,15 @@
           	     <hr/>
         		<label>Add Members</label>
    			   <div class="form-group">
-               <table id="memberTable" class="table table-bordered table-striped responsive nowrap">
-                <thead>
-                <tr>
-                  <th><i class='fas fa-check-square' aria-hidden='true'></i></th>
-            		  <th>Username</th>
-                  <th>Name</th>
-                </tr>
-                </thead>
-              </table>
+             <table id="example" class="table table-bordered table-striped responsive nowrap" cellspacing="0" width="100%">
+  			 <thead>
+   			   <tr>
+		         <th><i class='fas fa-check-square' aria-hidden='true'></i></th>
+		         <th>Name</th>
+ 		         <th>Position</th>
+ 		         </tr>
+   			</thead>
+   			</table>
                 </div>
                 <div>&nbsp;</div>
    				<hr />
@@ -142,38 +149,42 @@
 </script>  		
     		
 <script type="text/javascript">
-	$(document).ready(function (){
-      var table = $("#memberTable")
-				.DataTable(
-					{
-					 "processing" : true,
-       				 "serverSide" : true,
-       				 "lengthChange" : true,
-       				 "bSort" : false,
-       			     "ajax" : {
-       					 "url" : "memberBillingData?billingID=${billingID}"
- 		              },
- 		              "columnDefs": [
-         			{
-        				    "targets": 0,
-        				    "checkboxes": {
-        			       	"selectRow": true,
-        			       	"selectAll": false
-      			      }
-         			}
-     				 ],
-  					    "select": {
-  				       	"style": "multi"
-   					},
- 			     	 "columns" : [{
-								"data" : "id"
-							}, {
-								"data" : "username"
-							}, {
-								"data" : "name"
-							}]
-					}); 
-					
+	$(document).ready(function() {
+   var table = $('#example').DataTable({
+   	  'processing' : true,
+      'serverSide' : true,
+      'lengthChange' : true,
+      'bSort' : false,
+      'ajax': 'memberBillingData?billingID=${billingID}',
+      'columnDefs': [
+         {
+            'targets': 0,
+            'render': function(data, type, row, meta){
+               data = '<input type="checkbox" class="dt-checkboxes">'
+               if(row[3] === 'UNAVAILABLE'){
+                  data = '';
+               }
+               
+               return data;
+            },
+            'createdCell':  function (td, cellData, rowData, row, col){
+               if(rowData[3] === 'UNAVAILABLE'){
+                  this.api().cell(td).checkboxes.disable();
+               }
+            },            
+            'checkboxes': {
+               'selectRow': true,
+               'selectAll': false
+               
+            }
+         },
+      ],
+      'select': {
+         'style': 'multi'
+      },      
+      'order': [[1, 'asc']]
+   });
+   
    // Handle form submission event
    $('#frm-invoice').on('submit', function(e){
       var form = this;
@@ -191,7 +202,7 @@
          );
       });
    });
-  });
+});
 </script>
     
 <c:if test="${not empty fn:trim(notification)}">	

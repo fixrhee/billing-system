@@ -11,7 +11,6 @@ import java.util.Map;
 
 import javax.sql.DataSource;
 import org.billing.api.data.Billing;
-import org.billing.api.data.Group;
 import org.billing.api.data.Invoice;
 import org.billing.api.data.Member;
 import org.billing.api.data.PublishInvoice;
@@ -35,7 +34,7 @@ public class InvoiceRepository {
 	public List<Invoice> getAllInvoice(int pageSize, int rowNum, int billerID) {
 		try {
 			List<Invoice> inv = this.jdbcTemplate.query(
-					"SELECT id, billing_id, biller_id, member_id, invoice_number, amount, active, created_date FROM invoice WHERE biller_id = ? ORDER BY id DESC LIMIT ?,?;",
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, amount, description, active, created_date FROM invoice WHERE biller_id = ? ORDER BY id DESC LIMIT ?,?;",
 					new Object[] { billerID, pageSize, rowNum }, new RowMapper<Invoice>() {
 						public Invoice mapRow(ResultSet rs, int arg1) throws SQLException {
 							Invoice inv = new Invoice();
@@ -51,6 +50,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setActive(rs.getBoolean("active"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
 							return inv;
@@ -65,7 +65,7 @@ public class InvoiceRepository {
 	public List<PublishInvoice> getAllPublishInvoice(int pageSize, int rowNum, int billerID) {
 		try {
 			List<PublishInvoice> inv = this.jdbcTemplate.query(
-					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, status, created_date FROM invoice_published WHERE biller_id = ? ORDER BY id DESC LIMIT ?,?;",
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ? ORDER BY id DESC LIMIT ?,?;",
 					new Object[] { billerID, pageSize, rowNum }, new RowMapper<PublishInvoice>() {
 						public PublishInvoice mapRow(ResultSet rs, int arg1) throws SQLException {
 							PublishInvoice inv = new PublishInvoice();
@@ -81,6 +81,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setPaymentCode(rs.getString("payment_code"));
 							inv.setStatus(rs.getString("status"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
@@ -96,7 +97,7 @@ public class InvoiceRepository {
 	public PublishInvoice getPublishInvoiceByInvoice(int invoiceID, int billerID) {
 		try {
 			PublishInvoice inv = this.jdbcTemplate.queryForObject(
-					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, status, created_date FROM invoice_published WHERE biller_id = ? AND invoice_id = ?;",
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ? AND invoice_id = ?;",
 					new Object[] { billerID, invoiceID }, new RowMapper<PublishInvoice>() {
 						public PublishInvoice mapRow(ResultSet rs, int arg1) throws SQLException {
 							PublishInvoice inv = new PublishInvoice();
@@ -112,6 +113,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setPaymentCode(rs.getString("payment_code"));
 							inv.setStatus(rs.getString("status"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
@@ -128,7 +130,7 @@ public class InvoiceRepository {
 			int billerID, int memberID) {
 		try {
 			List<PublishInvoice> inv = this.jdbcTemplate.query(
-					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, status, created_date FROM invoice_published WHERE biller_id = ? AND member_id = ? AND (DATE(created_date) BETWEEN ? AND ?) ORDER BY id DESC LIMIT ?,?;",
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ? AND member_id = ? AND (DATE(created_date) BETWEEN ? AND ?) ORDER BY id DESC LIMIT ?,?;",
 					new Object[] { billerID, memberID, start, end, currentPage, pageSize },
 					new RowMapper<PublishInvoice>() {
 						public PublishInvoice mapRow(ResultSet rs, int arg1) throws SQLException {
@@ -145,6 +147,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setPaymentCode(rs.getString("payment_code"));
 							inv.setStatus(rs.getString("status"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
@@ -182,6 +185,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setPaymentCode(rs.getString("payment_code"));
 							inv.setStatus(rs.getString("status"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
@@ -219,6 +223,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setPaymentCode(rs.getString("payment_code"));
 							inv.setStatus(rs.getString("status"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
@@ -233,7 +238,7 @@ public class InvoiceRepository {
 	public Invoice getInvoiceByID(Object id, int billerID) {
 		try {
 			Invoice inv = this.jdbcTemplate.queryForObject(
-					"SELECT id, billing_id, biller_id, member_id, invoice_number, amount, active, created_date FROM invoice WHERE biller_id = ? AND id = ?;",
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, amount, description, active, created_date FROM invoice WHERE biller_id = ? AND id = ?;",
 					new Object[] { billerID, id }, new RowMapper<Invoice>() {
 						public Invoice mapRow(ResultSet rs, int arg1) throws SQLException {
 							Invoice inv = new Invoice();
@@ -249,6 +254,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setActive(rs.getBoolean("active"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
 							return inv;
@@ -263,7 +269,7 @@ public class InvoiceRepository {
 	public Invoice getInvoiceByNo(String no, int billerID) {
 		try {
 			Invoice inv = this.jdbcTemplate.queryForObject(
-					"SELECT id, billing_id, biller_id, member_id, invoice_number, amount, active, created_date FROM invoice WHERE biller_id = ? AND invoice_number = ?;",
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, amount, description, active, created_date FROM invoice WHERE biller_id = ? AND invoice_number = ?;",
 					new Object[] { billerID, no }, new RowMapper<Invoice>() {
 						public Invoice mapRow(ResultSet rs, int arg1) throws SQLException {
 							Invoice inv = new Invoice();
@@ -279,6 +285,7 @@ public class InvoiceRepository {
 							inv.setMember(member);
 							inv.setInvoiceNumber(rs.getString("invoice_number"));
 							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
 							inv.setActive(rs.getBoolean("active"));
 							inv.setCreatedDate(rs.getTimestamp("created_date"));
 							return inv;
@@ -292,9 +299,9 @@ public class InvoiceRepository {
 
 	public void createInvoice(Invoice inv, int id) {
 		jdbcTemplate.update(
-				"insert into invoice (billing_id, biller_id, member_id, invoice_number, amount) values (?, ?, ?, ?, ?)",
+				"insert into invoice (billing_id, biller_id, member_id, invoice_number, amount, description) values (?, ?, ?, ?, ?, ?)",
 				inv.getBilling().getId(), inv.getBiller().getId(), inv.getMember().getId(), inv.getInvoiceNumber(),
-				inv.getAmount());
+				inv.getAmount(), inv.getDescription());
 	}
 
 	public void createBatchInvoice(int billingID, int billerID, String invoiceNo, String amount, String desc,

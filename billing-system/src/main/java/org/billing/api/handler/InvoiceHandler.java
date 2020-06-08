@@ -1,5 +1,7 @@
 package org.billing.api.handler;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 import org.billing.api.data.Invoice;
@@ -59,6 +61,16 @@ public class InvoiceHandler {
 			return ResponseBuilder.getStatus(Status.PROCESSED, null);
 		} catch (TransactionException e) {
 			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
+	public List<Invoice> createBulkInvoice(String billingID, ArrayList<String> members, String amount,
+			String description, String token) throws TransactionException {
+		try {
+
+			return invoiceProcessor.createBulkInvoice(billingID, members, amount, description, token);
+		} catch (TransactionException e) {
+			return null;
 		}
 	}
 

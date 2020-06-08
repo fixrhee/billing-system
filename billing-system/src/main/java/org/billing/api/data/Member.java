@@ -16,6 +16,7 @@ public class Member {
 	private String address;
 	private String idCard;
 	private Boolean active;
+	private String description;
 
 	private Date createdDate;
 
@@ -106,6 +107,14 @@ public class Member {
 
 	public void setGroup(Group group) {
 		this.group = group;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

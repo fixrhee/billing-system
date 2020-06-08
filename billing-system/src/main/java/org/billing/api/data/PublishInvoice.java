@@ -13,6 +13,7 @@ public class PublishInvoice {
 	private String invoiceNumber;
 	private String paymentCode;
 	private BigDecimal amount;
+	private String description;
 	private String status;
 	private Date createdDate;
 
@@ -94,6 +95,14 @@ public class PublishInvoice {
 
 	public void setInvoiceID(Integer invoiceID) {
 		this.invoiceID = invoiceID;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }

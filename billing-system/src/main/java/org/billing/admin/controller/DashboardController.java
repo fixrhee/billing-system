@@ -1,6 +1,7 @@
 package org.billing.admin.controller;
 
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -11,7 +12,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.TimeZone;
-
 import javax.servlet.http.HttpServletResponse;
 
 import org.billing.admin.processor.AdminProcessor;
@@ -166,8 +166,8 @@ public class DashboardController {
 	public String memberBillingData(
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
 			@RequestParam(value = "start") Integer start, @RequestParam(value = "length") Integer length,
-			@RequestParam(value = "billingID") String billingID, @RequestParam(value = "search[value]") String search)
-			throws IOException, URISyntaxException, ParseException {
+			@RequestParam(value = "billingID") String billingID, @RequestParam(value = "search[value]") String search,
+			@RequestParam(value = "draw") String draw) throws IOException, URISyntaxException, ParseException {
 		Map<String, Object> jsonMap = new HashMap<String, Object>();
 		List<Object> jsonList = new LinkedList<Object>();
 
@@ -197,29 +197,21 @@ public class DashboardController {
 					jsonMap.put("recordsTotal", 0);
 					jsonMap.put("recordsFiltered", 0);
 				}
-
 			}
 		} else {
 			JSONObject data = adminProcessor.loadMemberByBilling(sessionID, billingID, String.valueOf(start),
 					String.valueOf(length));
 			JSONObject payload = data.getJSONObject("payload");
-			System.out.println(payload.getJSONArray("body").length());
 			for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
-				Map<String, Object> jsonData = new HashMap<String, Object>();
-				jsonData.put("id", payload.getJSONArray("body").getJSONObject(i).get("id"));
-				jsonData.put("username", payload.getJSONArray("body").getJSONObject(i).get("username"));
-				jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).get("name"));
-				jsonData.put("email", payload.getJSONArray("body").getJSONObject(i).get("email"));
-				String bDate = payload.getJSONArray("body").getJSONObject(i).getString("createdDate");
-				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-				format.setTimeZone(TimeZone.getTimeZone("GMT"));
-				Date date = format.parse(bDate);
-				String finalDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-				jsonData.put("createdDate", finalDate);
-				jsonList.add(jsonData);
-				jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
-				jsonMap.put("recordsFiltered", payload.getInt("filteredRecord"));
+				List<Object> jsonListData = new LinkedList<Object>();
+				jsonListData.add(payload.getJSONArray("body").getJSONObject(i).get("id"));
+				jsonListData.add(payload.getJSONArray("body").getJSONObject(i).get("username"));
+				jsonListData.add(payload.getJSONArray("body").getJSONObject(i).get("name"));
+				jsonListData.add(payload.getJSONArray("body").getJSONObject(i).get("description"));
+				jsonList.add(jsonListData);
 			}
+			jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+			jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
 		}
 		jsonMap.put("data", jsonList);
 		ObjectMapper Obj = new ObjectMapper();
@@ -462,14 +454,23 @@ public class DashboardController {
 			if (member == null) {
 				return new ModelAndView("redirect:/login");
 			}
-
-			System.out.println("[Billing : " + billingID + "]");
+			List<Integer> amounts = new LinkedList<Integer>();
 			StringJoiner description = new StringJoiner(";");
 			for (int i = 0; i < item.length; i++) {
-				description.add(item[i] + "," + amount[i]);
+				if (item[i] != null && !item[i].isEmpty()) {
+					if (amount[i] != null && !amount[i].isEmpty()) {
+						description.add(item[i] + "," + amount[i]);
+						amounts.add(Integer.parseInt(amount[i]));
+					}
+				}
 			}
-			System.out.println("[Description : " + description + "]");
-			adminProcessor.createInvoice(sessionID, billingID, "", memberID, "150000");
+			Integer sum = amounts.stream().reduce(0, (a, b) -> a + b);
+			JSONObject jo = new JSONObject();
+			jo.put("billingID", billingID);
+			jo.put("amount", new BigDecimal(sum));
+			jo.put("members", memberID);
+			jo.put("description", description);
+			adminProcessor.createInvoice(sessionID, jo.toString());
 			return new ModelAndView("invoice");
 		} catch (Exception ex) {
 			ex.printStackTrace();

@@ -62,7 +62,7 @@ public class MemberHandler {
 		}
 	}
 
-	public ServiceResponse getMemberByBillingReduce(int currentPage, int pageSize, String id, String token) {
+	public ServiceResponse getMemberByBillingReversed(int currentPage, int pageSize, String id, String token) {
 		try {
 			Map<String, Object> lacq = memberProcessor.getMemberByBilling(currentPage, pageSize, id, token, true);
 			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);

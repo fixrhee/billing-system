@@ -108,6 +108,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="member-getByBillingFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
 			path="member/billing" allowedMethods="GET" doc:name="HTTP" />
+		<logger level="INFO" message="#[message.inboundProperties.'http.query.params']"/>
 		<set-variable
 			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
 			variableName="token" doc:name="Variable" />
@@ -125,14 +126,14 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 		</message-filter>
 		<choice>
 			<when
-				expression="#[message.inboundProperties.'http.query.params'.reduce == null]">
+				expression="#[message.inboundProperties.'http.query.params'.reversed == null]">
 				<invoke method="getMemberByBilling"
 					methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[message.inboundProperties.'http.query.params'.billingID], #[flowVars['token']]"
 					object-ref="MemberServiceImpl" doc:name="Invoke" />
 			</when>
 			<when
-				expression="#[message.inboundProperties.'http.query.params'.reduce == 'true']">
-				<invoke method="getMemberByBillingReduce"
+				expression="#[message.inboundProperties.'http.query.params'.reversed == 'true']">
+				<invoke method="getMemberByBillingReversed"
 					methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[message.inboundProperties.'http.query.params'.billingID], #[flowVars['token']]"
 					object-ref="MemberServiceImpl" doc:name="Invoke" />
 			</when>

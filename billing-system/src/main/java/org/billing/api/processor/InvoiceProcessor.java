@@ -137,7 +137,7 @@ public class InvoiceProcessor {
 		invoiceRepository.createInvoice(inv, b.getId());
 		mapLock.unlock(String.valueOf(b.getId()) + String.valueOf(m.getId()));
 	}
-	
+
 	public void createBatchInvoice(Invoice inv, String token) throws TransactionException {
 		Member b = memberProcessor.Authenticate(token);
 		if (b == null) {
@@ -229,5 +229,30 @@ public class InvoiceProcessor {
 		mm.put("body", lpi);
 		mm.put("totalRecord", count);
 		return mm;
+	}
+
+	public List<Invoice> createBulkInvoice(String billingID, ArrayList<String> members, String amount, String description, String token)
+			throws TransactionException {
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		List<Invoice> li = new LinkedList<Invoice>();
+		for (int i = 0; i < members.size(); i++) {
+			Invoice inv = new Invoice();
+			inv.setAmount(new BigDecimal(amount));
+			Billing billing = new Billing();
+			billing.setId(Integer.valueOf(billingID));
+			inv.setBilling(billing);
+			Member member = new Member();
+			member.setId(Integer.valueOf(members.get(i)));
+			inv.setMember(member);
+			Member biller = new Member();
+			biller.setId(b.getId());
+			inv.setBiller(biller);
+			inv.setDescription(description);
+			li.add(inv);
+		}
+		return li;
 	}
 }

@@ -327,11 +327,6 @@ public class MemberRepository {
 		return seq;
 	}
 
-	@Autowired
-	public void setDataSource(DataSource dataSource) {
-		this.jdbcTemplate = new JdbcTemplate(dataSource);
-	}
-
 	public List<Integer> getMemberByBilling(int pageSize, int rowNum, Integer billingID, Integer billerID) {
 		try {
 			List<Integer> mid = this.jdbcTemplate.query(
@@ -346,7 +341,29 @@ public class MemberRepository {
 			return null;
 		}
 	}
-	
-	
 
+	public Map<Integer, String> getAllMemberIDByBilling(Integer billingID, Integer billerID) {
+		try {
+			Map<Integer, String> mid = this.jdbcTemplate.query(
+					"SELECT member_id, invoice_number FROM invoice WHERE billing_id = ? AND biller_id = ?;",
+					new Object[] { billingID, billerID }, new ResultSetExtractor<Map<Integer, String>>() {
+						@Override
+						public Map<Integer, String> extractData(ResultSet rs) throws SQLException, DataAccessException {
+							Map<Integer, String> mm = new HashMap<Integer, String>();
+							while (rs.next()) {
+								mm.put(rs.getInt("member_id"), rs.getString("invoice_number"));
+							}
+							return mm;
+						}
+					});
+			return mid;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	@Autowired
+	public void setDataSource(DataSource dataSource) {
+		this.jdbcTemplate = new JdbcTemplate(dataSource);
+	}
 }

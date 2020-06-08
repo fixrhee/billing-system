@@ -13,6 +13,7 @@ public class Invoice {
 	private String invoiceNumber;
 	private BigDecimal amount;
 	private Boolean active;
+	private String description;
 	private Date createdDate;
 
 	public Billing getBilling() {
@@ -85,6 +86,14 @@ public class Invoice {
 
 	public void setPublishInvoice(PublishInvoice publishInvoice) {
 		this.publishInvoice = publishInvoice;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 }
