@@ -45,7 +45,16 @@
 <link href="plugins/wizard/smart_wizard_all.css" rel="stylesheet">
  <!-- Bootstrap4 Duallistbox -->
 <link rel="stylesheet" href="plugins/bootstrap4-duallistbox/bootstrap-duallistbox.min.css">
-
+<style>
+#tabs .nav-tabs .nav-item.show .nav-link, .nav-tabs .nav-link.active {
+    color: #0c92f7;
+    background-color: #f7f7f7;
+    border-color: transparent transparent #0c92f7;
+    border-bottom: 3px solid !important;
+    font-size: 18px;
+    font-weight: bold;
+}
+</style>
 </head>
 <body class="hold-transition sidebar-mini layout-fixed">
 	<div class="wrapper">

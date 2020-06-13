@@ -23,6 +23,8 @@ public abstract class ResponseBuilder {
 			return new ServiceResponse(arg.toString(), "404", "The Specified Billing Not Found On System", payload);
 		case INVOICE_NOT_FOUND:
 			return new ServiceResponse(arg.toString(), "404", "The Specified Invoice Not Found On System", payload);
+		case MESSAGE_NOT_FOUND:
+			return new ServiceResponse(arg.toString(), "404", "The Specified Message Not Found On System", payload);
 		case MEMBER_ALREADY_REGISTERED:
 			return new ServiceResponse(arg.toString(), "404", "The Specified Member Already Registered On System",
 					payload);

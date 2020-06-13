@@ -114,6 +114,37 @@ public class MemberProcessor {
 		}
 	}
 
+	public void createBulkMember(Member member, String bid) throws TransactionException {
+		Member b = memberRepository.getMemberByID(bid);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+
+		Member lacq = memberRepository.getMemberByUsername(member.getUsername());
+		if (lacq != null) {
+			Integer id = memberRepository.getMembershipID(lacq.getId(), b.getId());
+			if (id != 0) {
+				throw new TransactionException(Status.MEMBER_ALREADY_REGISTERED);
+			} else {
+				IMap<String, String> mapLock = hazelcastInstance.getMap("MemberLock");
+				mapLock.lock(lacq.getUsername());
+				Integer sequence = memberRepository.countMembership(lacq.getId());
+				if (sequence == 99) {
+					mapLock.unlock(lacq.getUsername());
+					throw new TransactionException(Status.MEMBER_LIMIT);
+				}
+				memberRepository.createMembership(lacq.getId(), b.getId(), sequence + 1);
+				mapLock.unlock(lacq.getUsername());
+			}
+		} else {
+			Group group = new Group();
+			group.setId(3);
+			member.setGroup(group);
+			Integer cid = memberRepository.createMember(member);
+			memberRepository.createMembership(cid, b.getId(), 1);
+		}
+	}
+
 	public void updateMember(String id, Member member, String token) throws TransactionException {
 		Member b = this.Authenticate(token);
 		if (b == null) {
@@ -213,8 +244,8 @@ public class MemberProcessor {
 		return mm;
 	}
 
-	public Map<String, Object> getMemberByBilling(int currentPage, int pageSize, String id, String token,
-			boolean negate) throws TransactionException {
+	public Map<String, Object> getMemberByBilling(int currentPage, int pageSize, String id, String token, boolean avail)
+			throws TransactionException {
 		Map<String, Object> mm = new HashMap<String, Object>();
 		Member b = this.Authenticate(token);
 		if (b == null) {
@@ -227,7 +258,7 @@ public class MemberProcessor {
 
 		Integer count = memberRepository.totalMember(b.getId());
 		List<Member> lMap = new LinkedList<Member>();
-		if (negate == false) {
+		if (avail == false) {
 			List<Integer> ids = memberRepository.getMemberByBilling(currentPage, pageSize, lacq.getId(), b.getId());
 			lMap = memberRepository.getMemberInList(ids);
 			mm.put("totalRecord", count);
@@ -254,5 +285,32 @@ public class MemberProcessor {
 		}
 		mm.put("body", lMap);
 		return mm;
+	}
+
+	public Member searchMemberByBilling(String username, String billingID, String token) throws TransactionException {
+		Member b = this.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		Billing lacq = billingRepository.getBillingByID(billingID, b.getId());
+		if (lacq == null) {
+			throw new TransactionException(Status.BILLING_NOT_FOUND);
+		}
+		Member ma = memberRepository.getMemberByBilling(billingID, username, b.getId());
+		if (ma == null) {
+			Member mu = memberRepository.getMemberByUsername(username);
+			if (mu == null) {
+				throw new TransactionException(Status.MEMBER_NOT_FOUND);
+			}
+			Integer mid = memberRepository.getMembershipID(mu.getId(), b.getId());
+			if (mid == 0) {
+				throw new TransactionException(Status.MEMBER_NOT_FOUND);
+			}
+			mu.setDescription("AVALIABLE");
+			return mu;
+		} else {
+			ma.setDescription("UNAVAILABLE");
+			return ma;
+		}
 	}
 }

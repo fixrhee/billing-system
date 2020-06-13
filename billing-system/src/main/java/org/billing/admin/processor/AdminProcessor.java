@@ -156,12 +156,51 @@ public class AdminProcessor {
 		return new JSONObject(result);
 	}
 
+	public JSONObject createMember(String name, String msisdn, String email, String address, String idcard,
+			String token) throws MalformedURLException, IOException {
+		String result = "";
+		HttpPost post = new HttpPost("http://localhost:8900/host/api/member");
+
+		List<NameValuePair> urlParameters = new ArrayList<>();
+		urlParameters.add(new BasicNameValuePair("name", name));
+		urlParameters.add(new BasicNameValuePair("msisdn", msisdn));
+		urlParameters.add(new BasicNameValuePair("email", email));
+		urlParameters.add(new BasicNameValuePair("address", address));
+		urlParameters.add(new BasicNameValuePair("idCard", idcard));
+
+		post.setEntity(new UrlEncodedFormEntity(urlParameters));
+		post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(post)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+
+		return new JSONObject(result);
+	}
+
+	public JSONObject searchMemberByBilling(String token, String username, String billingID)
+			throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/member/billing/username/" + username);
+		builder.setParameter("billingID", billingID);
+
+		HttpGet get = new HttpGet(builder.build());
+
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+
+		return new JSONObject(result);
+	}
+
 	public JSONObject loadMemberByBilling(String token, String billingID, String currentPage, String pageSize)
 			throws MalformedURLException, IOException, URISyntaxException {
 		String result = "";
 		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/member/billing");
 		builder.setParameter("currentPage", currentPage).setParameter("pageSize", pageSize)
-				.setParameter("billingID", billingID).setParameter("reduce", "true");
+				.setParameter("billingID", billingID).setParameter("availability", "true");
 		HttpGet get = new HttpGet(builder.build());
 
 		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
@@ -187,6 +226,54 @@ public class AdminProcessor {
 		}
 
 		return new JSONObject(result);
+	}
+
+	public JSONObject loadBillingByID(String token, String billingID)
+			throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/billing/" + billingID);
+		HttpGet get = new HttpGet(builder.build());
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+		return new JSONObject(result);
+	}
+
+	public JSONObject loadBillingItem(String token, String id)
+			throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/billing/item");
+		builder.setParameter("billingID", id);
+		HttpGet get = new HttpGet(builder.build());
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+		return new JSONObject(result);
+	}
+
+	public String updateBillingItem(String token, String items, String id)
+			throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/billing/item");
+		HttpPost post = new HttpPost(builder.build());
+		post.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		post.setHeader("Accept", "*/*");
+		post.setHeader("Content-type", "application/x-www-form-urlencoded");
+
+		List<NameValuePair> params = new ArrayList<NameValuePair>();
+		params.add(new BasicNameValuePair("billingID", id));
+		params.add(new BasicNameValuePair("items", items));
+		post.setEntity(new UrlEncodedFormEntity(params));
+
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(post)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+		return result;
 	}
 
 	public JSONObject loadInvoice(String token, String currentPage, String pageSize)

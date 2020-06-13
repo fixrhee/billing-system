@@ -32,12 +32,19 @@
 		<url-pattern>/member</url-pattern>
 		<url-pattern>/memberData</url-pattern>
 		<url-pattern>/memberBillingData</url-pattern>
+		<url-pattern>/createMember</url-pattern>
+		<url-pattern>/submitMember</url-pattern>
+		<url-pattern>/submitMemberResult</url-pattern>
+		<url-pattern>/submitBulkMember</url-pattern>
+		<url-pattern>/download/MemberTemplate.csv</url-pattern>
 		<url-pattern>/billing</url-pattern>
 		<url-pattern>/billingData</url-pattern>
 		<url-pattern>/invoice</url-pattern>
 		<url-pattern>/invoiceData</url-pattern>
 		<url-pattern>/createInvoice</url-pattern>
 		<url-pattern>/submitInvoice</url-pattern>
+		<url-pattern>/submitInvoiceResult</url-pattern>
+		<url-pattern>/message</url-pattern>
 	</servlet-mapping>
 
 	<listener>

@@ -362,6 +362,35 @@ public class MemberRepository {
 		}
 	}
 
+	public Member getMemberByBilling(String billingID, String username, Integer billerID) {
+		try {
+			Member member = this.jdbcTemplate.queryForObject(
+					"select m.id, m.group_id, m.username, m.name, m.email, m.password, m.msisdn, m.address, m.id_card, m.active, m.created_date from Member m inner join invoice i on m.id = i.member_id where i.billing_id = ? and i.biller_id = ? and m.username = ?;",
+					new Object[] { billingID, billerID, username }, new RowMapper<Member>() {
+						public Member mapRow(ResultSet rs, int arg1) throws SQLException {
+							Member member = new Member();
+							Group group = new Group();
+							group.setId(rs.getInt("group_id"));
+							member.setGroup(group);
+							member.setId(rs.getInt("id"));
+							member.setName(rs.getString("name"));
+							member.setEmail(rs.getString("email"));
+							member.setUsername(rs.getString("username"));
+							member.setPassword(rs.getString("password"));
+							member.setAddress(rs.getString("address"));
+							member.setIdCard(rs.getString("id_card"));
+							member.setMsisdn(rs.getString("msisdn"));
+							member.setActive(rs.getBoolean("active"));
+							member.setCreatedDate(rs.getTimestamp("created_date"));
+							return member;
+						}
+					});
+			return member;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
 	@Autowired
 	public void setDataSource(DataSource dataSource) {
 		this.jdbcTemplate = new JdbcTemplate(dataSource);

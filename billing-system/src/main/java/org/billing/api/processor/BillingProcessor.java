@@ -78,4 +78,32 @@ public class BillingProcessor {
 			throw new TransactionException(Status.SERVICE_NOT_ALLOWED);
 		}
 	}
+
+	public String getBillingItem(String id, String token) throws TransactionException {
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		Billing lacq = billingRepository.getBillingByID(id, b.getId());
+		if (lacq == null) {
+			throw new TransactionException(Status.BILLING_NOT_FOUND);
+		}
+		String item = billingRepository.getBillingItem(id);
+		if (item == null) {
+			return "{}";
+		}
+		return item;
+	}
+
+	public void updateBillingItem(String id, String items, String token) throws TransactionException {
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		Billing lacq = billingRepository.getBillingByID(id, b.getId());
+		if (lacq == null) {
+			throw new TransactionException(Status.BILLING_NOT_FOUND);
+		}
+		billingRepository.updateBillingItem(items, id);
+	}
 }

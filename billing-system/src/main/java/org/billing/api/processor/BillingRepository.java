@@ -102,6 +102,16 @@ public class BillingRepository {
 		return mapRet;
 	}
 
+	public void updateBillingItem(String items, String id) {
+		jdbcTemplate.update("update billing set default_items = ? where id = ?;", items, id);
+	}
+
+	public String getBillingItem(String id) {
+		String items = this.jdbcTemplate.queryForObject("SELECT default_items from billing WHERE id = ?;",
+				new Object[] { id }, String.class);
+		return items;
+	}
+
 	public void createBilling(Billing billing, int id) {
 		jdbcTemplate.update(
 				"insert into billing (member_id, name, description, billing_cycle, outstanding) values (?, ?, ?, ?, ?)",

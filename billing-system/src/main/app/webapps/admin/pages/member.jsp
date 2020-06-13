@@ -22,10 +22,10 @@
             </ol>
           </div>
         </div>
-            <div align="right">
-        		<button type="button" class="btn btn-primary" onclick="window.location.href='createMember';">Create New Member</button>
-        </div>
-   
+                 <div align="right">
+        			<button type="button" class="btn btn-primary" onclick="window.location.href='createMember';">Create New Member</button>
+       		 </div>
+ 
       </div><!-- /.container-fluid -->
     </section>
 

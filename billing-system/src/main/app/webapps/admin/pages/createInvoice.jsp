@@ -32,7 +32,7 @@
         <div class="col-12">
           <div class="card">
           <div class="card-header">
-        		 <h3><i class='fas fa-edit' aria-hidden='true'></i>Iuran IPL</h3> Invoice Form
+        		 <h3><i class='fas fa-edit' aria-hidden='true'></i>${billingName}</h3> Invoice Form
           </div>
             <!-- /.card-header -->
             <div class="card-body">
@@ -41,50 +41,50 @@
    			 <div class="form-group">
                 <div class="row">
 	                <div class="col-md-6">
-	                    <input type="text" name="item" placeholder="Enter Item Name 1" class="form-control">
+	                    <input type="text" name="item" placeholder="Enter Item Name 1" required value="${item1}" class="form-control">
 	                </div>
 	                <div>&nbsp;</div>
 	                <div class="col-md-3">
-	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" placeholder="Enter Amount 1">
+	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" required value="${amount1}" placeholder="Enter Amount 1">
 	                </div>
 	            </div>
           	  </div>
           	   <div class="form-group">
                 <div class="row">
 	                <div class="col-md-6">
-	                    <input type="text" name="item" placeholder="Enter Item Name 2" class="form-control">
+	                    <input type="text" name="item" placeholder="Enter Item Name 2" value="${item2}" class="form-control">
 	                </div>
 	                <div>&nbsp;</div>
 	                <div class="col-md-3">
-	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" placeholder="Enter Amount 2">
+	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" placeholder="Enter Amount 2" value="${amount2}">
 	                </div>
 	            </div>
           	  </div>
           	  <div class="form-group">
                 <div class="row">
 	                <div class="col-md-6">
-	                    <input type="text" name="item" placeholder="Enter Item Name 3" class="form-control">
+	                    <input type="text" name="item" placeholder="Enter Item Name 3" value="${item3}" class="form-control">
 	                </div>
 	                	<div>&nbsp;</div>
 	                <div class="col-md-3">
-	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" placeholder="Enter Amount 3">
+	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" value="${amount3}" placeholder="Enter Amount 3">
 	                </div>
 	            </div>
           	  </div>
           	  <div class="form-group">
                 <div class="row">
 	                <div class="col-md-6">
-	                    <input type="text" name="item" placeholder="Enter Item Name 4" class="form-control">
+	                    <input type="text" name="item" placeholder="Enter Item Name 4" value="${item4}" class="form-control">
 	                </div>
 	                	<div>&nbsp;</div>
 	                <div class="col-md-3">
-	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" placeholder="Enter Amount 4">
+	                    <input type="number" class="form-control" name="amount" onblur="findTotal();" value="${amount4}" placeholder="Enter Amount 4">
 	                </div>
 	            </div>
           	  </div>
           	     <div class="form-group">
                    <div class="custom-control custom-switch">
-                      <input type="checkbox" class="custom-control-input" id="customSwitch1">
+                      <input type="checkbox" name="saveItem" class="custom-control-input" id="customSwitch1">
                       <label class="custom-control-label" for="customSwitch1">Save Item</label>
                     </div>
                   </div>
@@ -95,7 +95,7 @@
 	                    <font color="red"><label>Total Amount </label></font>
 	                </div>
 	                <div class="col-md-3">
-	            		  <b>Rp. <span id="sum">0</span>,-</b>
+	            		  <b>Rp. <span id="sum">${totalAmount}</span>,-</b>
 	                </div>
 	            </div>
           	  </div>
@@ -114,14 +114,14 @@
    			</table>
                 </div>
                 <div>&nbsp;</div>
+            </div>
+            <!-- /.card-body -->
    				<hr />
   			   <div class="card-footer" align="right">
-  			     <input type="hidden" name="billing" id="billing" value="6" />
+  			     <input type="hidden" name="billing" id="billing" value="${billingID}" />
 	             <button type="submit" class="btn btn-info">Submit</button>
                  </form>
                </div>
-            </div>
-            <!-- /.card-body -->
           </div>
           <!-- /.card -->
         </div>
@@ -188,9 +188,8 @@
    // Handle form submission event
    $('#frm-invoice').on('submit', function(e){
       var form = this;
-
       var rows_selected = table.column(0).checkboxes.selected();
-
+      
       // Iterate over all selected checkboxes
       $.each(rows_selected, function(index, rowId){
          // Create a hidden element

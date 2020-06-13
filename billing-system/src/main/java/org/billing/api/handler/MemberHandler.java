@@ -62,9 +62,18 @@ public class MemberHandler {
 		}
 	}
 
-	public ServiceResponse getMemberByBillingReversed(int currentPage, int pageSize, String id, String token) {
+	public ServiceResponse getMemberByBillingAvailability(int currentPage, int pageSize, String id, String token) {
 		try {
 			Map<String, Object> lacq = memberProcessor.getMemberByBilling(currentPage, pageSize, id, token, true);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
+	public ServiceResponse searchMemberByBilling(String username, String id, String token) {
+		try {
+			Member lacq = memberProcessor.searchMemberByBilling(username, id, token);
 			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
 		} catch (TransactionException e) {
 			return ResponseBuilder.getStatus(e.getMessage(), null);
@@ -83,6 +92,15 @@ public class MemberHandler {
 	public ServiceResponse createMember(Member member, String token) throws TransactionException {
 		try {
 			memberProcessor.createMember(member, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, null);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+	
+	public ServiceResponse createBulkMember(Member member, String billerID) throws TransactionException {
+		try {
+			memberProcessor.createBulkMember(member, billerID);
 			return ResponseBuilder.getStatus(Status.PROCESSED, null);
 		} catch (TransactionException e) {
 			return ResponseBuilder.getStatus(e.getMessage(), null);

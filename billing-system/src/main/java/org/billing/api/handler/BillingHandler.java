@@ -35,6 +35,24 @@ public class BillingHandler {
 		}
 	}
 
+	public String getBillingItem(String id, String token) {
+		try {
+			String item = billingProcessor.getBillingItem(id, token);
+			return item;
+		} catch (TransactionException e) {
+			return "FAILED";
+		}
+	}
+
+	public ServiceResponse updateBillingItem(String id, String items, String token) {
+		try {
+			billingProcessor.updateBillingItem(id, items, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, null);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
 	public ServiceResponse createBilling(Billing billing, String token) throws TransactionException {
 		try {
 			billingProcessor.createBilling(billing, token);
