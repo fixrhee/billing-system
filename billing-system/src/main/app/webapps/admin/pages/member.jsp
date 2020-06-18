@@ -23,7 +23,7 @@
           </div>
         </div>
                  <div align="right">
-        			<button type="button" class="btn btn-primary" onclick="window.location.href='createMember';">Create New Member</button>
+        			<button type="button" class="btn btn-primary" onclick="window.location.href='createMember';"><i class="fa fa-plus-circle" aria-hidden="true"></i> Create New Member</button>
        		 </div>
  
       </div><!-- /.container-fluid -->
@@ -74,8 +74,9 @@
 					{
 					 "processing" : true,
        				 "serverSide" : true,
-       				 "dom" : 'Blfrtip',
-       			     "ajax" : {
+       				 "bFilter": false,
+       				 "bSort" : false,
+     			     "ajax" : {
        					 "url" : "memberData"
    					},
  			     	 "columns" : [{
@@ -89,8 +90,8 @@
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-                   					 return "<a href='editOutlet?id=" + data + "' class='btn btn-info btn-xs'><i class='fas fa-info-circle' aria-hidden='true'></i> Detail </a> " + 
-                   					 " <a href='editOutlet?id=" + data + "' class='btn btn-success btn-xs'><i class='fas fa-edit' aria-hidden='true'></i> Edit</a> ";
+                   					 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='View Detail' /><i class='fa fa-info-circle'></i> " + 
+                   					 " <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Edit' /><i class='far fa-edit'></i>";
                					 }	
 							}]
 					});

@@ -17,11 +17,12 @@
   <link rel="stylesheet" href="dist/css/adminlte.min.css">
   <!-- Google Font: Source Sans Pro -->
   <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:300,400,400i,700" rel="stylesheet">
+  
 </head>
-<body class="hold-transition login-page">
+<body class="hold-transition login-page" style="background-image: url('dist/img/bg-03.png');">
 <div class="login-box">
   <div class="login-logo">
-    <a href="index2.html"><b>Admin</b>VS</a>
+    <a href="index.html"><b>Admin</b>VS</a>
   </div>
   <!-- /.login-logo -->
   <div class="card">

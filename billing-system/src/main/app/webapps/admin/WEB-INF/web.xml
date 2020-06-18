@@ -38,13 +38,18 @@
 		<url-pattern>/submitBulkMember</url-pattern>
 		<url-pattern>/download/MemberTemplate.csv</url-pattern>
 		<url-pattern>/billing</url-pattern>
+		<url-pattern>/createBilling</url-pattern>
+		<url-pattern>/submitBilling</url-pattern>
+		<url-pattern>/submitBillingResult</url-pattern>
 		<url-pattern>/billingData</url-pattern>
+		<url-pattern>/billingDetail</url-pattern>
 		<url-pattern>/invoice</url-pattern>
 		<url-pattern>/invoiceData</url-pattern>
 		<url-pattern>/createInvoice</url-pattern>
 		<url-pattern>/submitInvoice</url-pattern>
 		<url-pattern>/submitInvoiceResult</url-pattern>
 		<url-pattern>/message</url-pattern>
+		<url-pattern>/messageData</url-pattern>
 	</servlet-mapping>
 
 	<listener>

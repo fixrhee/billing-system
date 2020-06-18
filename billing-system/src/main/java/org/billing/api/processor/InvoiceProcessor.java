@@ -231,8 +231,76 @@ public class InvoiceProcessor {
 		return mm;
 	}
 
-	public List<Invoice> createBulkInvoice(String billingID, ArrayList<String> members, String amount, String description, String token)
-			throws TransactionException {
+	public Map<String, Object> loadAllPublishInvoiceBillingStatus(String start, String end, String billingID,
+			String status, int currentPage, int pageSize, String token) throws TransactionException {
+		Map<String, Object> mm = new HashMap<String, Object>();
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		List<PublishInvoice> lacq = invoiceRepository.publishInvoiceBillingStatus(start, end, currentPage, pageSize,
+				b.getId(), billingID, status);
+		Integer count = invoiceRepository.totalPublishInvoice(b.getId());
+		if (lacq.size() == 0) {
+			throw new TransactionException(Status.INVOICE_NOT_FOUND);
+		}
+		List<Integer> ids = new LinkedList<Integer>();
+		List<Integer> idb = new LinkedList<Integer>();
+		for (int i = 0; i < lacq.size(); i++) {
+			ids.add(lacq.get(i).getMember().getId());
+			idb.add(lacq.get(i).getBilling().getId());
+		}
+
+		List<PublishInvoice> lpi = new ArrayList<PublishInvoice>(lacq);
+		Map<Integer, Member> pm = memberRepository.getMemberInMap(ids);
+		Map<Integer, Billing> bm = billingRepository.getBillingInMap(idb);
+
+		for (int i = 0; i < lacq.size(); i++) {
+			lpi.get(i).setMember(pm.get(lacq.get(i).getMember().getId()));
+			lpi.get(i).setBilling(bm.get(lacq.get(i).getBilling().getId()));
+		}
+
+		mm.put("body", lpi);
+		mm.put("totalRecord", count);
+		return mm;
+	}
+
+	public Map<String, Object> loadAllPublishInvoiceBilling(String start, String end, String billingID, int currentPage,
+			int pageSize, String token) throws TransactionException {
+		Map<String, Object> mm = new HashMap<String, Object>();
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		List<PublishInvoice> lacq = invoiceRepository.publishInvoiceBilling(start, end, currentPage, pageSize,
+				b.getId(), billingID);
+		Integer count = invoiceRepository.totalPublishInvoice(b.getId());
+		if (lacq.size() == 0) {
+			throw new TransactionException(Status.INVOICE_NOT_FOUND);
+		}
+		List<Integer> ids = new LinkedList<Integer>();
+		List<Integer> idb = new LinkedList<Integer>();
+		for (int i = 0; i < lacq.size(); i++) {
+			ids.add(lacq.get(i).getMember().getId());
+			idb.add(lacq.get(i).getBilling().getId());
+		}
+
+		List<PublishInvoice> lpi = new ArrayList<PublishInvoice>(lacq);
+		Map<Integer, Member> pm = memberRepository.getMemberInMap(ids);
+		Map<Integer, Billing> bm = billingRepository.getBillingInMap(idb);
+
+		for (int i = 0; i < lacq.size(); i++) {
+			lpi.get(i).setMember(pm.get(lacq.get(i).getMember().getId()));
+			lpi.get(i).setBilling(bm.get(lacq.get(i).getBilling().getId()));
+		}
+
+		mm.put("body", lpi);
+		mm.put("totalRecord", count);
+		return mm;
+	}
+
+	public List<Invoice> createBulkInvoice(String billingID, ArrayList<String> members, String amount,
+			String description, String token) throws TransactionException {
 		Member b = memberProcessor.Authenticate(token);
 		if (b == null) {
 			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);

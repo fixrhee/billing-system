@@ -13,16 +13,16 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Invoices</h1>
+            <h1>Billing</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="index">Home</a></li>
-              <li class="breadcrumb-item active">Invoices</li>
+              <li class="breadcrumb-item">Billing</li>
+              <li class="breadcrumb-item active">Billing Detail</li>
             </ol>
           </div>
-        </div>
-   
+        </div>  
       </div><!-- /.container-fluid -->
     </section>
 
@@ -32,23 +32,26 @@
         <div class="col-12">
           <div class="card">
             <div class="card-header">
-              <h3 class="card-title">All Invoice List</h3>
-              <div align="right"><%= (new java.util.Date()).toLocaleString()%></div>
+              <h3 class="card-title">Billing Detail</h3>
             </div>
+   
             <!-- /.card-header -->
             <div class="card-body">
-              <table id="example2" class="table table-bordered table-striped responsive nowrap">
-                <thead>
-                <tr>
-                  <th>Invoice Number</th>
-                  <th>Name</th>
-                  <th>Billing</th>
-                  <th>Amount</th>
-                  <th>Status</th>
-                  <th>Action</th>
-                </tr>
-                </thead>
-              </table>
+      	     <table class="table">
+                  <thead>
+                    <tr>
+                      <th style="width: 10px">#</th>
+                      <th>Task</th>
+                      <th>Progress</th>
+                      <th style="width: 40px">Label</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>1.</td>
+ 				    </tr>
+ 			     </tbody>
+  		    </table>
             </div>
             <!-- /.card-body -->
           </div>
@@ -67,34 +70,41 @@
 		<!-- /.footer -->
 		
 <script>
- 		$("#example2")
+ 		$("#billingTable")
 				.DataTable(
 					{
 					 "processing" : true,
        				 "serverSide" : true,
+       				 "bFilter": false,
        				 "bSort" : false,
        			     "ajax" : {
-       					 "url" : "invoiceData"
+       					 "url" : "billingData"
  		              },
  			     	 "columns" : [{
-								"data" : "invoiceNo"
-							}, {
 								"data" : "name"
 							}, {
-								"data" : "billing"
+								"data" : "description"
 							}, {
-								"data" : "amount"
+								"data" : "billingCycle"
 							}, {
-								"data" : "status"
+								"data" : "outstanding"
+							}, {
+								"data" : "createdDate"
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-        					 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='View Detail' /><i class='fa fa-info-circle'></i> " + 
-                   					 " <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Edit' /><i class='far fa-edit'></i>";
+        							 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Edit' /><i class='fa fa-edit'></i> " + 
+                   					 " <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Add Invoice' onclick='createInvoice(" + data + ");'/><i class='fa fa-plus-circle'></i>";
                					 }	
 							}]
 					});
-	</script>
+</script>
+
+<script>
+function createInvoice(id){
+	window.location.href='createInvoice?billingID=' + id;
+};
+</script>
 
 <c:if test="${not empty fn:trim(notification)}">	
 	<script type="text/javascript">

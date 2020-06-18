@@ -20,7 +20,9 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.commons.lang3.StringUtils;
 import org.billing.admin.processor.AdminProcessor;
+import org.billing.admin.processor.TimeAgo;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,6 +60,8 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			String memberName = memberInfo.getJSONObject("payload").getString("name");
 			Map<String, String> menus = adminProcessor.getMenu(sessionID, "index");
@@ -66,6 +70,7 @@ public class DashboardController {
 			model.addAttribute("name", memberName);
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
 			return new ModelAndView("index");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -87,6 +92,8 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			String memberName = memberInfo.getJSONObject("payload").getString("name");
 			Map<String, String> menus = adminProcessor.getMenu(sessionID, "member");
@@ -95,6 +102,7 @@ public class DashboardController {
 			model.addAttribute("name", memberName);
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
 			return new ModelAndView("member");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -117,6 +125,8 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			String memberName = memberInfo.getJSONObject("payload").getString("name");
 			Map<String, String> menus = adminProcessor.getMenu(sessionID, "member");
@@ -125,6 +135,7 @@ public class DashboardController {
 			model.addAttribute("name", memberName);
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
 			return new ModelAndView("createMember");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -176,27 +187,42 @@ public class DashboardController {
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
 			@RequestParam(value = "status") String status, @RequestParam(value = "message") String message,
 			HttpServletResponse response, Model model) throws MalformedURLException, IOException {
+		try {
 
-		if (status.equalsIgnoreCase("PROCESSED")) {
-			model.addAttribute("title", "Member Created Successfuly");
-			model.addAttribute("message", "New Member has been succesfully created");
-			model.addAttribute("notification", "success");
-		} else {
-			model.addAttribute("title", "Create Member Failed");
-			model.addAttribute("message", status);
-			model.addAttribute("notification", "error");
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+			if (status.equalsIgnoreCase("PROCESSED")) {
+				model.addAttribute("title", "Member Created Successfuly");
+				model.addAttribute("message", "New Member has been succesfully created");
+				model.addAttribute("notification", "success");
+			} else {
+				model.addAttribute("title", "Create Member Failed");
+				model.addAttribute("message", status);
+				model.addAttribute("notification", "error");
+			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "member");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+			return new ModelAndView("member");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("status", "FAILED");
+			model.addAttribute("message",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
 		}
-
-		JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
-		String memberName = memberInfo.getJSONObject("payload").getString("name");
-		Map<String, String> menus = adminProcessor.getMenu(sessionID, "member");
-		String menu = menus.get("menu");
-		String welcomeMenu = menus.get("welcomeMenu");
-		model.addAttribute("name", memberName);
-		model.addAttribute("menu", menu);
-		model.addAttribute("welcomeMenu", welcomeMenu);
-
-		return new ModelAndView("member");
 	}
 
 	@RequestMapping(value = "/submitBulkMember", method = { RequestMethod.POST })
@@ -369,6 +395,9 @@ public class DashboardController {
 			if (member == null) {
 				return new ModelAndView("redirect:/login");
 			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			String memberName = memberInfo.getJSONObject("payload").getString("name");
 			Map<String, String> menus = adminProcessor.getMenu(sessionID, "billing");
@@ -377,12 +406,123 @@ public class DashboardController {
 			model.addAttribute("name", memberName);
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
 			return new ModelAndView("billing");
 		} catch (Exception ex) {
 			ex.printStackTrace();
 			model.addAttribute("httpResponseCode", "500");
 			model.addAttribute("status", "Oops !");
 			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
+	@RequestMapping(value = "/createBilling", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView createBilling(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			HttpServletResponse response, Model model) {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "billing");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+			return new ModelAndView("createBilling");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("httpResponseCode", "500");
+			model.addAttribute("status", "Oops !");
+			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
+	@RequestMapping(value = "/submitBilling", method = { RequestMethod.POST })
+	public ModelAndView submitBilling(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "name", required = true) String name,
+			@RequestParam(value = "description", required = true) String description,
+			@RequestParam(value = "cycle", required = true) String cycle,
+			@RequestParam(value = "outstanding", required = false) String outstanding, Model model) {
+		try {
+
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			String outs = outstanding != null ? "true" : "false";
+			JSONObject res = adminProcessor.createBilling(name, description, cycle, outs, sessionID);
+			if (res.getString("status").equalsIgnoreCase("PROCESSED")) {
+				model.addAttribute("message", "OK");
+				model.addAttribute("status", "PROCESSED");
+			} else {
+				model.addAttribute("message", "FAILED");
+				model.addAttribute("status", res.getString("description"));
+			}
+			return new ModelAndView("redirect:/submitBillingResult");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("status", "FAILED");
+			model.addAttribute("message",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
+	@RequestMapping(value = "/submitBillingResult", method = { RequestMethod.GET })
+	public ModelAndView submitBillingResult(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "status") String status, @RequestParam(value = "message") String message,
+			HttpServletResponse response, Model model) throws MalformedURLException, IOException {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+			if (status.equalsIgnoreCase("PROCESSED")) {
+				model.addAttribute("title", "Billing Created Successfuly");
+				model.addAttribute("message", "New Billing has been succesfully created");
+				model.addAttribute("notification", "success");
+			} else {
+				model.addAttribute("title", "Create Billing Failed");
+				model.addAttribute("message", status);
+				model.addAttribute("notification", "error");
+			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "member");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+
+			return new ModelAndView("billing");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("status", "FAILED");
+			model.addAttribute("message",
 					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
 			return new ModelAndView("page_exception");
 		}
@@ -436,6 +576,9 @@ public class DashboardController {
 			if (member == null) {
 				return new ModelAndView("redirect:/login");
 			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			String memberName = memberInfo.getJSONObject("payload").getString("name");
 			Map<String, String> menus = adminProcessor.getMenu(sessionID, "invoice");
@@ -444,6 +587,7 @@ public class DashboardController {
 			model.addAttribute("name", memberName);
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
 			return new ModelAndView("invoice");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -610,6 +754,8 @@ public class DashboardController {
 			model.addAttribute("amount4", amount4);
 			model.addAttribute("totalAmount", String.format("%,d", sum).replace(',', '.'));
 
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			String memberName = memberInfo.getJSONObject("payload").getString("name");
 			Map<String, String> menus = adminProcessor.getMenu(sessionID, "billing");
@@ -620,6 +766,7 @@ public class DashboardController {
 			model.addAttribute("name", memberName);
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
 			return new ModelAndView("createInvoice");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -692,40 +839,114 @@ public class DashboardController {
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
 			@RequestParam(value = "status") String status, @RequestParam(value = "message") String message,
 			HttpServletResponse response, Model model) throws MalformedURLException, IOException {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
 
-		if (status.equalsIgnoreCase("PROCESSED")) {
-			model.addAttribute("title", "Invoice submission completed");
-			model.addAttribute("message", "New invoice has been succesfully submited");
-			model.addAttribute("notification", "success");
-		} else {
-			model.addAttribute("title", "Invoice submission failed");
-			model.addAttribute("message", "New invoice submission failed");
-			model.addAttribute("notification", "danger");
+			if (status.equalsIgnoreCase("PROCESSED")) {
+				model.addAttribute("title", "Invoice submission completed");
+				model.addAttribute("message", "New invoice has been succesfully submited");
+				model.addAttribute("notification", "success");
+			} else {
+				model.addAttribute("title", "Invoice submission failed");
+				model.addAttribute("message", "New invoice submission failed");
+				model.addAttribute("notification", "danger");
+			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "invoice");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+			return new ModelAndView("invoice");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("status", "FAILED");
+			model.addAttribute("message",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
 		}
-
-		JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
-		String memberName = memberInfo.getJSONObject("payload").getString("name");
-		Map<String, String> menus = adminProcessor.getMenu(sessionID, "invoice");
-		String menu = menus.get("menu");
-		String welcomeMenu = menus.get("welcomeMenu");
-		model.addAttribute("name", memberName);
-		model.addAttribute("menu", menu);
-		model.addAttribute("welcomeMenu", welcomeMenu);
-
-		return new ModelAndView("invoice");
 	}
 
 	@RequestMapping(value = "/message", method = { RequestMethod.GET })
 	public ModelAndView message(@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
 			HttpServletResponse response, Model model) throws MalformedURLException, IOException {
-		JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
-		String memberName = memberInfo.getJSONObject("payload").getString("name");
-		Map<String, String> menus = adminProcessor.getMenu(sessionID, "message");
-		String menu = menus.get("menu");
-		String welcomeMenu = menus.get("welcomeMenu");
-		model.addAttribute("name", memberName);
-		model.addAttribute("menu", menu);
-		model.addAttribute("welcomeMenu", welcomeMenu);
-		return new ModelAndView("message");
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "message");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+			return new ModelAndView("message");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("status", "FAILED");
+			model.addAttribute("message",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/messageData", method = RequestMethod.GET)
+	public String messageData(@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "start") Integer start, @RequestParam(value = "length") Integer length,
+			@RequestParam(value = "search[value]") String search)
+			throws IOException, URISyntaxException, ParseException {
+
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+		List<Object> jsonList = new LinkedList<Object>();
+
+		JSONObject data = adminProcessor.loadMessage(String.valueOf(start), String.valueOf(length), sessionID);
+		JSONObject payload = data.getJSONObject("payload");
+
+		for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+			List<Object> jsonListData = new LinkedList<Object>();
+			jsonListData.add(payload.getJSONArray("body").getJSONObject(i).get("id"));
+			jsonListData
+					.add(payload.getJSONArray("body").getJSONObject(i).getJSONObject("fromMember").getString("name"));
+
+			String body = payload.getJSONArray("body").getJSONObject(i).getString("body");
+
+			if (body.length() > 100) {
+				body = body.substring(0, 100) + "...";
+			}
+			jsonListData.add(payload.getJSONArray("body").getJSONObject(i).get("subject"));
+			jsonListData.add(body);
+			String bDate = payload.getJSONArray("body").getJSONObject(i).getString("createdDate");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+			format.setTimeZone(TimeZone.getTimeZone("GMT"));
+			Date date = format.parse(bDate);
+			String timeAgo = TimeAgo.toRelative(date, new Date(), 1);
+			jsonListData.add(timeAgo);
+			jsonList.add(jsonListData);
+		}
+		jsonMap.put("data", jsonList);
+		jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+		jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+		ObjectMapper Obj = new ObjectMapper();
+		String jsonStr = Obj.writeValueAsString(jsonMap);
+		return jsonStr;
 	}
 }

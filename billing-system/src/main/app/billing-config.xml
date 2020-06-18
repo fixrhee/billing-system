@@ -100,6 +100,7 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="billing-createFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
 			path="billing" allowedMethods="POST" doc:name="HTTP" />
+			<logger level="INFO" message="#[payload]"/>
 		<set-variable
 			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
 			variableName="token" doc:name="Variable" />

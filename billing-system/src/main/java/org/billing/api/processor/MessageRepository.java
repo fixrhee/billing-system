@@ -34,6 +34,7 @@ public class MessageRepository {
 							msg.setToMember(to);
 							msg.setId(rs.getInt("id"));
 							msg.setArchive(rs.getBoolean("archive"));
+							msg.setSubject(rs.getString("subject"));
 							msg.setBody(rs.getString("body"));
 							msg.setRead(rs.getBoolean("read"));
 							msg.setTag(rs.getString("tag"));
@@ -63,6 +64,7 @@ public class MessageRepository {
 							msg.setToMember(to);
 							msg.setId(rs.getInt("id"));
 							msg.setArchive(rs.getBoolean("archive"));
+							msg.setSubject(rs.getString("subject"));
 							msg.setBody(rs.getString("body"));
 							msg.setRead(rs.getBoolean("read"));
 							msg.setTag(rs.getString("tag"));
@@ -98,7 +100,7 @@ public class MessageRepository {
 
 	public Integer totalUnreadMessage(int memberID) {
 		Integer count = this.jdbcTemplate.queryForObject(
-				"SELECT COUNT(id) from message WHERE to_member_id = ? and read = false;", new Object[] { memberID },
+				"SELECT COUNT(id) from message WHERE message.to_member_id = ? and message.read = false;", new Object[] { memberID },
 				Integer.class);
 		return count;
 	}

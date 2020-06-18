@@ -211,4 +211,42 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			object-ref="InvoiceServiceImpl" doc:name="Invoke" />
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
 	</flow>
+
+	<flow name="publishInvoice-loadByBillingFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="invoice/publish/billing" allowedMethods="GET" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.currentPage != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.pageSize != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.startDate != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.endDate != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.billingID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<choice>
+			<when
+				expression="#[message.inboundProperties.'http.query.params'.status != null]">
+				<invoke method="loadAllPublishInvoiceBillingStatus"
+					methodArguments="#[message.inboundProperties.'http.query.params'.startDate], #[message.inboundProperties.'http.query.params'.endDate], #[message.inboundProperties.'http.query.params'.billingID], #[message.inboundProperties.'http.query.params'.status], #[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[flowVars['token']]"
+					object-ref="InvoiceServiceImpl" doc:name="Invoke" />
+			</when>
+			<otherwise>
+				<invoke method="loadAllPublishInvoiceBilling"
+					methodArguments="#[message.inboundProperties.'http.query.params'.startDate], #[message.inboundProperties.'http.query.params'.endDate], #[message.inboundProperties.'http.query.params'.billingID], #[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[flowVars['token']]"
+					object-ref="InvoiceServiceImpl" doc:name="Invoke" />
+			</otherwise>
+		</choice>
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
 </mule>

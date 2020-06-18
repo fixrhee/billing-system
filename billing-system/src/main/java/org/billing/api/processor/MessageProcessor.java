@@ -1,6 +1,7 @@
 package org.billing.api.processor;
 
 import java.util.HashMap;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 import org.billing.api.data.Billing;
@@ -28,9 +29,23 @@ public class MessageProcessor {
 			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
 		}
 		List<Message> lacq = messageRepository.getAllMessage(currentPage, pageSize, b.getId());
+		List<Integer> ids = new LinkedList<Integer>();
+		for (int i = 0; i < lacq.size(); i++) {
+			ids.add(lacq.get(i).getFromMember().getId());
+			ids.add(lacq.get(i).getToMember().getId());
+		}
+
+		Map<Integer, Member> pm = memberRepository.getMemberInMap(ids);
+		List<Message> lm = new LinkedList<Message>(lacq);
+		for (int i = 0; i < lacq.size(); i++) {
+			lm.get(i).setFromMember(pm.get(lacq.get(i).getFromMember().getId()));
+			lm.get(i).setToMember(pm.get(lacq.get(i).getToMember().getId()));
+		}
 		Integer count = messageRepository.totalMessage(b.getId());
-		mm.put("body", lacq);
+		Integer unread = messageRepository.totalUnreadMessage(b.getId());
+		mm.put("body", lm);
 		mm.put("totalRecord", count);
+		mm.put("unreadMessage", unread);
 		return mm;
 	}
 

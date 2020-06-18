@@ -94,6 +94,38 @@ public class InvoiceRepository {
 		}
 	}
 
+	public List<PublishInvoice> loadPublishInvoiceByBilling(int pageSize, int rowNum, int billerID, int billingID) {
+		try {
+			List<PublishInvoice> inv = this.jdbcTemplate.query(
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ?  AND billingID = ? ORDER BY id DESC LIMIT ?,?;",
+					new Object[] { billerID, pageSize, rowNum }, new RowMapper<PublishInvoice>() {
+						public PublishInvoice mapRow(ResultSet rs, int arg1) throws SQLException {
+							PublishInvoice inv = new PublishInvoice();
+							Billing bill = new Billing();
+							bill.setId(rs.getInt("billing_id"));
+							Member biller = new Member();
+							biller.setId(rs.getInt("biller_id"));
+							Member member = new Member();
+							member.setId(rs.getInt("member_id"));
+							inv.setId(rs.getInt("id"));
+							inv.setBilling(bill);
+							inv.setBiller(biller);
+							inv.setMember(member);
+							inv.setInvoiceNumber(rs.getString("invoice_number"));
+							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
+							inv.setPaymentCode(rs.getString("payment_code"));
+							inv.setStatus(rs.getString("status"));
+							inv.setCreatedDate(rs.getTimestamp("created_date"));
+							return inv;
+						}
+					});
+			return inv;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
 	public PublishInvoice getPublishInvoiceByInvoice(int invoiceID, int billerID) {
 		try {
 			PublishInvoice inv = this.jdbcTemplate.queryForObject(
@@ -126,12 +158,46 @@ public class InvoiceRepository {
 		}
 	}
 
-	public List<PublishInvoice> publishInvoiceStatus(String start, String end, int currentPage, int pageSize,
-			int billerID, int memberID) {
+	public List<PublishInvoice> publishInvoiceBillingStatus(String start, String end, int currentPage, int pageSize,
+			int billerID, String billingID, String status) {
 		try {
 			List<PublishInvoice> inv = this.jdbcTemplate.query(
-					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ? AND member_id = ? AND (DATE(created_date) BETWEEN ? AND ?) ORDER BY id DESC LIMIT ?,?;",
-					new Object[] { billerID, memberID, start, end, currentPage, pageSize },
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ? AND billing_id = ? AND status = ? AND (DATE(created_date) BETWEEN ? AND ?) ORDER BY id DESC LIMIT ?,?;",
+					new Object[] { billerID, billingID, status, start, end, currentPage, pageSize },
+					new RowMapper<PublishInvoice>() {
+						public PublishInvoice mapRow(ResultSet rs, int arg1) throws SQLException {
+							PublishInvoice inv = new PublishInvoice();
+							Billing bill = new Billing();
+							bill.setId(rs.getInt("billing_id"));
+							Member biller = new Member();
+							biller.setId(rs.getInt("biller_id"));
+							Member member = new Member();
+							member.setId(rs.getInt("member_id"));
+							inv.setId(rs.getInt("id"));
+							inv.setBilling(bill);
+							inv.setBiller(biller);
+							inv.setMember(member);
+							inv.setInvoiceNumber(rs.getString("invoice_number"));
+							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
+							inv.setPaymentCode(rs.getString("payment_code"));
+							inv.setStatus(rs.getString("status"));
+							inv.setCreatedDate(rs.getTimestamp("created_date"));
+							return inv;
+						}
+					});
+			return inv;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
+	public List<PublishInvoice> publishInvoiceBilling(String start, String end, int currentPage, int pageSize,
+			Integer billerID, String billingID) {
+		try {
+			List<PublishInvoice> inv = this.jdbcTemplate.query(
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ? AND billing_id = ? AND (DATE(created_date) BETWEEN ? AND ?) ORDER BY id DESC LIMIT ?,?;",
+					new Object[] { billerID, billingID, start, end, currentPage, pageSize },
 					new RowMapper<PublishInvoice>() {
 						public PublishInvoice mapRow(ResultSet rs, int arg1) throws SQLException {
 							PublishInvoice inv = new PublishInvoice();

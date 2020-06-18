@@ -37,6 +37,28 @@ public class InvoiceHandler {
 		}
 	}
 
+	public ServiceResponse loadAllPublishInvoiceBillingStatus(String start, String end, String billingID, String status,
+			int currentPage, int pageSize, String token) throws TransactionException {
+		try {
+			Map<String, Object> lacq = invoiceProcessor.loadAllPublishInvoiceBillingStatus(start, end, billingID,
+					status, currentPage, pageSize, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
+	public ServiceResponse loadAllPublishInvoiceBilling(String start, String end, String billingID, int currentPage,
+			int pageSize, String token) throws TransactionException {
+		try {
+			Map<String, Object> lacq = invoiceProcessor.loadAllPublishInvoiceBilling(start, end, billingID, currentPage,
+					pageSize, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
 	public ServiceResponse getInvoiceByID(String id, String token) {
 		try {
 			Invoice lacq = invoiceProcessor.getInvoiceByID(id, token);

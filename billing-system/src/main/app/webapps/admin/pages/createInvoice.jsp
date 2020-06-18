@@ -107,8 +107,8 @@
   			 <thead>
    			   <tr>
 		         <th><i class='fas fa-check-square' aria-hidden='true'></i></th>
-		         <th>Name</th>
- 		         <th>Position</th>
+		         <th>Username</th>
+ 		         <th>Name</th>
  		         </tr>
    			</thead>
    			</table>

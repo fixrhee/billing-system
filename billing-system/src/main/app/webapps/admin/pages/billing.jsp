@@ -23,7 +23,7 @@
           </div>
         </div>
             <div align="right">
-        		<button type="button" class="btn btn-primary" onclick="window.location.href='createBilling';">Create New Billing</button>
+        		<button type="button" class="btn btn-primary" onclick="window.location.href='createBilling';"><i class="fa fa-plus-circle" aria-hidden="true"></i> Create New Billing</button>
         </div>
    
       </div><!-- /.container-fluid -->
@@ -76,6 +76,7 @@
 					 "processing" : true,
        				 "serverSide" : true,
        				 "bFilter": false,
+       				 "bSort" : false,
        			     "ajax" : {
        					 "url" : "billingData"
  		              },
@@ -92,12 +93,25 @@
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-                   					 return "<a href='editOutlet?id=" + data + "' class='btn btn-info btn-xs'><i class='fas fa-edit' aria-hidden='true'></i> Edit</a> " +
-               					 			"<a href='createInvoice?billingID=" + data + "' class='btn btn-success btn-xs'><i class='far fa-plus-square' aria-hidden='true'></i> Add Invoice</a>";
+        							 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='View Detail' onclick='viewDetail(" + data + ");'/><i class='fa fa-info-circle'></i> " + 
+        									" <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Edit' /><i class='fa fa-edit'></i> " + 
+                   					 	" <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Add Invoice' onclick='createInvoice(" + data + ");'/><i class='fa fa-plus-circle'></i>";
                					 }	
 							}]
 					});
-	</script>
+</script>
+
+<script>
+function createInvoice(id){
+	window.location.href='createInvoice?billingID=' + id;
+};
+</script>
+
+<script>
+function viewDetail(id){
+	window.location.href='billingDetail?billingID=' + id;
+};
+</script>
 
 <c:if test="${not empty fn:trim(notification)}">	
 	<script type="text/javascript">
