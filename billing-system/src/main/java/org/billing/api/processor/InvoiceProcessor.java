@@ -265,6 +265,32 @@ public class InvoiceProcessor {
 		return mm;
 	}
 
+	public Map<String, Object> getPublishInvoiceMember(String billingID, String username, String token)
+			throws TransactionException {
+		Map<String, Object> mm = new HashMap<String, Object>();
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+
+		Member m = memberRepository.getMemberByUsername(username);
+		if (m == null) {
+			throw new TransactionException(Status.MEMBER_NOT_FOUND);
+		}
+		Billing bl = billingRepository.getBillingByID(billingID, b.getId());
+		if (bl == null) {
+			throw new TransactionException(Status.BILLING_NOT_FOUND);
+		}
+		PublishInvoice lacq = invoiceRepository.publishInvoiceMember(b.getId(), billingID, m.getId());
+		if (lacq == null) {
+			throw new TransactionException(Status.INVOICE_NOT_FOUND);
+		}
+		lacq.setMember(m);
+		lacq.setBilling(bl);
+		mm.put("body", lacq);
+		return mm;
+	}
+
 	public Map<String, Object> loadAllPublishInvoiceBilling(String start, String end, String billingID, int currentPage,
 			int pageSize, String token) throws TransactionException {
 		Map<String, Object> mm = new HashMap<String, Object>();
@@ -322,5 +348,34 @@ public class InvoiceProcessor {
 			li.add(inv);
 		}
 		return li;
+	}
+
+	public Map<String, Object> getInvoiceStat(String billingID, String startDate, String endDate, String token)
+			throws TransactionException {
+		Member b = memberProcessor.Authenticate(token);
+		if (b == null) {
+			throw new TransactionException(Status.UNAUTHORIZED_ACCESS);
+		}
+		Billing lacq = billingRepository.getBillingByID(billingID, b.getId());
+		if (lacq == null) {
+			throw new TransactionException(Status.BILLING_NOT_FOUND);
+		}
+
+		Integer totalMemberBilling = invoiceRepository.countMemberBilling(billingID, b.getId());
+		Integer totalPaid = invoiceRepository.countMemberBillingStatus(billingID, b.getId(), "PAID", startDate,
+				endDate);
+		Integer totalUnPaid = invoiceRepository.countMemberBillingStatus(billingID, b.getId(), "UNPAID", startDate,
+				endDate);
+		double paidPercentage = 0;
+		if (totalMemberBilling != 0) {
+			paidPercentage = totalPaid * 100 / totalMemberBilling;
+		}
+		Map<String, Object> payload = new HashMap<String, Object>();
+		payload.put("totalMember", totalMemberBilling);
+		payload.put("totalPaidMember", totalPaid);
+		payload.put("totalUnpaidMember", totalUnPaid);
+		payload.put("paidPercentage", paidPercentage);
+		payload.put("billing", lacq);
+		return payload;
 	}
 }

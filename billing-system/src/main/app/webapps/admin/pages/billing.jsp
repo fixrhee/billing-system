@@ -47,7 +47,7 @@
                   <th>Description</th>
                   <th>Cycle</th>
                   <th>Outstanding</th>
-                  <th>Created Date</th>
+                  <th>Payment</th>
                   <th>Action</th>
                 </tr>
                 </thead>
@@ -89,7 +89,7 @@
 							}, {
 								"data" : "outstanding"
 							}, {
-								"data" : "createdDate"
+								"data" : "stat"
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {

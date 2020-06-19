@@ -11,10 +11,12 @@ import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedList;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
@@ -23,6 +25,7 @@ import javax.servlet.http.HttpSession;
 import org.apache.commons.lang3.StringUtils;
 import org.billing.admin.processor.AdminProcessor;
 import org.billing.admin.processor.TimeAgo;
+import org.billing.api.processor.Utils;
 import org.json.JSONArray;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -418,6 +421,71 @@ public class DashboardController {
 		}
 	}
 
+	@RequestMapping(value = "/billingDetail", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView billingDetail(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "billingID", required = true) String billingID, HttpServletResponse response,
+			Model model) {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			JSONObject dataStat = adminProcessor.loadInvoiceStat(sessionID, String.valueOf(billingID),
+					Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate());
+
+			JSONObject billing = adminProcessor.loadBillingByID(sessionID, billingID);
+			String billingName = billing.getJSONObject("payload").getString("name");
+			String description = billing.getJSONObject("payload").getString("description");
+			Integer cycle = billing.getJSONObject("payload").getInt("billingCycle");
+			boolean outstanding = billing.getJSONObject("payload").getBoolean("outstanding");
+
+			String bDate = billing.getJSONObject("payload").getString("createdDate");
+			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+			format.setTimeZone(TimeZone.getTimeZone("GMT"));
+			Date date = format.parse(bDate);
+			String finalDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "billing");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+
+			model.addAttribute("billingID", billingID);
+			model.addAttribute("billingName", billingName);
+			model.addAttribute("description", description);
+			model.addAttribute("billingCycle", cycle);
+			model.addAttribute("outstanding", outstanding);
+			model.addAttribute("createdDate", finalDate);
+
+			Calendar mCalendar = Calendar.getInstance();
+			String month = mCalendar.getDisplayName(Calendar.MONTH, Calendar.LONG, Locale.getDefault());
+			int year = mCalendar.get(Calendar.YEAR);
+
+			model.addAttribute("period", month + " " + year);
+			model.addAttribute("totalMember", dataStat.getJSONObject("payload").getInt("totalMember"));
+			model.addAttribute("totalPaid", dataStat.getJSONObject("payload").getInt("totalPaidMember"));
+			model.addAttribute("totalUnpaid", dataStat.getJSONObject("payload").getInt("totalUnpaidMember"));
+			return new ModelAndView("billingDetail");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("httpResponseCode", "500");
+			model.addAttribute("status", "Oops !");
+			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
 	@RequestMapping(value = "/createBilling", method = { RequestMethod.POST, RequestMethod.GET })
 	public ModelAndView createBilling(
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
@@ -541,6 +609,11 @@ public class DashboardController {
 
 		for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
 			Map<String, Object> jsonData = new HashMap<String, Object>();
+
+			JSONObject dataStat = adminProcessor.loadInvoiceStat(sessionID,
+					String.valueOf(payload.getJSONArray("body").getJSONObject(i).getInt("id")),
+					Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate());
+
 			jsonData.put("id", payload.getJSONArray("body").getJSONObject(i).get("id"));
 			jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).get("name"));
 			jsonData.put("description", payload.getJSONArray("body").getJSONObject(i).get("description"));
@@ -549,17 +622,105 @@ public class DashboardController {
 			String ot = outstanding == true ? "<span class='right badge badge-success'>True</span>"
 					: "<span class='right badge badge-danger'>False</span>";
 			jsonData.put("outstanding", ot);
-			String bDate = payload.getJSONArray("body").getJSONObject(i).getString("createdDate");
-			SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
-			format.setTimeZone(TimeZone.getTimeZone("GMT"));
-			Date date = format.parse(bDate);
-			String finalDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
-			jsonData.put("createdDate", finalDate);
-			jsonList.add(jsonData);
-		}
 
+			if (dataStat.has("payload")) {
+				double stat = dataStat.getJSONObject("payload").getDouble("paidPercentage");
+				if (stat >= 0 && stat <= 30.0) {
+					jsonData.put("stat",
+							"<div class='progress progress-xs progress-striped active'><div class='progress-bar bg-danger' style='width: "
+									+ stat + "%'></div></div><span class='right badge badge-danger'>" + stat
+									+ "%</span></div>");
+				} else if (stat >= 31 && stat <= 50.0) {
+					jsonData.put("stat",
+							"<div class='progress progress-xs progress-striped active'><div class='progress-bar bg-warning' style='width: "
+									+ stat + "%'></div></div><span class='right badge badge-warning'>" + stat
+									+ "%</span></div>");
+				} else {
+					jsonData.put("stat",
+							"<div class='progress progress-xs progress-striped active'><div class='progress-bar bg-success' style='width: "
+									+ stat + "%'></div></div><span class='right badge badge-success'>" + stat
+									+ "%</span></div>");
+				}
+				jsonList.add(jsonData);
+			} else {
+				jsonData.put("stat",
+						"<div class='progress progress-xs progress-striped active'><div class='progress-bar bg-danger' style='width: "
+								+ 0 + "%'></div><span class='right badge badge-danger'>0%</span></div>");
+			}
+		}
 		jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
 		jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+		jsonMap.put("data", jsonList);
+
+		ObjectMapper Obj = new ObjectMapper();
+		String jsonStr = Obj.writeValueAsString(jsonMap);
+		return jsonStr;
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/billingStatusData", method = RequestMethod.GET)
+	public String billingPaidData(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "start") Integer start, @RequestParam(value = "length") Integer length,
+			@RequestParam(value = "billingID") String billingID, @RequestParam(value = "search[value]") String search)
+			throws IOException, URISyntaxException, ParseException {
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+		List<Object> jsonList = new LinkedList<Object>();
+
+		if (!search.isEmpty()) {
+			if (search.length() <= 10) {
+				jsonMap.put("recordsTotal", 0);
+				jsonMap.put("recordsFiltered", 0);
+			} else {
+				JSONObject data = adminProcessor.loadPublishedInvoiceByMember(sessionID, billingID, search);
+				if (data.has("payload")) {
+					Map<String, Object> jsonData = new HashMap<String, Object>();
+					jsonData.put("username", data.getJSONObject("payload").getJSONObject("body").getJSONObject("member")
+							.getString("username"));
+					jsonData.put("name", data.getJSONObject("payload").getJSONObject("body").getJSONObject("member")
+							.getString("name"));
+					jsonData.put("amount", data.getJSONObject("payload").getJSONObject("body").getDouble("amount"));
+					jsonData.put("invoice",
+							data.getJSONObject("payload").getJSONObject("body").getString("invoiceNumber"));
+					if (data.getJSONObject("payload").getJSONObject("body").getString("status")
+							.equalsIgnoreCase("PAID")) {
+						jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
+					} else {
+						jsonData.put("status", "<span class='right badge badge-danger'>UNPAID</span>");
+					}
+					jsonList.add(jsonData);
+					jsonMap.put("recordsTotal", 1);
+					jsonMap.put("recordsFiltered", 1);
+				}
+			}
+		} else {
+			JSONObject data = adminProcessor.loadPublishedInvoice(sessionID, billingID, start, length,
+					Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate());
+
+			if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
+				JSONObject payload = data.getJSONObject("payload");
+				for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+					Map<String, Object> jsonData = new HashMap<String, Object>();
+					jsonData.put("username", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+							.getString("username"));
+					jsonData.put("name",
+							payload.getJSONArray("body").getJSONObject(i).getJSONObject("member").getString("name"));
+					jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
+					jsonData.put("invoice", payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
+					if (payload.getJSONArray("body").getJSONObject(i).getString("status").equalsIgnoreCase("PAID")) {
+						jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
+					} else {
+						jsonData.put("status", "<span class='right badge badge-danger'>UNPAID</span>");
+					}
+					jsonList.add(jsonData);
+				}
+				jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+				jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+			} else {
+				jsonMap.put("recordsTotal", 0);
+				jsonMap.put("recordsFiltered", 0);
+			}
+		}
 		jsonMap.put("data", jsonList);
 
 		ObjectMapper Obj = new ObjectMapper();

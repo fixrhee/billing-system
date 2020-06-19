@@ -226,6 +226,38 @@ public class InvoiceRepository {
 		}
 	}
 
+	public PublishInvoice publishInvoiceMember(Integer billerID, String billingID, int memberID) {
+		try {
+			PublishInvoice inv = this.jdbcTemplate.queryForObject(
+					"SELECT id, billing_id, biller_id, member_id, invoice_number, payment_code, amount, description, status, created_date FROM invoice_published WHERE biller_id = ? AND billing_id = ? AND member_id = ?;",
+					new Object[] { billerID, billingID, memberID }, new RowMapper<PublishInvoice>() {
+						public PublishInvoice mapRow(ResultSet rs, int arg1) throws SQLException {
+							PublishInvoice inv = new PublishInvoice();
+							Billing bill = new Billing();
+							bill.setId(rs.getInt("billing_id"));
+							Member biller = new Member();
+							biller.setId(rs.getInt("biller_id"));
+							Member member = new Member();
+							member.setId(rs.getInt("member_id"));
+							inv.setId(rs.getInt("id"));
+							inv.setBilling(bill);
+							inv.setBiller(biller);
+							inv.setMember(member);
+							inv.setInvoiceNumber(rs.getString("invoice_number"));
+							inv.setAmount(rs.getBigDecimal("amount"));
+							inv.setDescription(rs.getString("description"));
+							inv.setPaymentCode(rs.getString("payment_code"));
+							inv.setStatus(rs.getString("status"));
+							inv.setCreatedDate(rs.getTimestamp("created_date"));
+							return inv;
+						}
+					});
+			return inv;
+		} catch (EmptyResultDataAccessException e) {
+			return null;
+		}
+	}
+
 	public Map<Integer, PublishInvoice> getPublishInvoiceInMap(List<Integer> ids) {
 		String sql = "select * from invoice_published where invoice_id in (:invoiceID)";
 		Map<String, List<Integer>> paramMap = Collections.singletonMap("invoiceID", ids);
@@ -405,6 +437,20 @@ public class InvoiceRepository {
 		Integer count = this.jdbcTemplate.queryForObject(
 				"SELECT COUNT(id) from invoice WHERE biller_id = ? AND member_id = ?;",
 				new Object[] { billerID, memberID }, Integer.class);
+		return count;
+	}
+
+	public Integer countMemberBilling(String billingID, int billerID) {
+		Integer count = this.jdbcTemplate.queryForObject(
+				"SELECT COUNT(member_id) from invoice WHERE billing_id = ? AND biller_id = ?;",
+				new Object[] { billingID, billerID }, Integer.class);
+		return count;
+	}
+
+	public Integer countMemberBillingStatus(String billingID, int billerID, String status, String start, String end) {
+		Integer count = this.jdbcTemplate.queryForObject(
+				"SELECT COUNT(member_id) from invoice_published WHERE billing_id = ? AND biller_id = ? AND status = ? AND (DATE(created_date) BETWEEN ? AND ?) ;",
+				new Object[] { billingID, billerID, status, start, end }, Integer.class);
 		return count;
 	}
 

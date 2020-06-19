@@ -43,6 +43,7 @@
 		<url-pattern>/submitBillingResult</url-pattern>
 		<url-pattern>/billingData</url-pattern>
 		<url-pattern>/billingDetail</url-pattern>
+		<url-pattern>/billingStatusData</url-pattern>
 		<url-pattern>/invoice</url-pattern>
 		<url-pattern>/invoiceData</url-pattern>
 		<url-pattern>/createInvoice</url-pattern>

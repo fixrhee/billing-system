@@ -37,6 +37,15 @@ public class InvoiceHandler {
 		}
 	}
 
+	public ServiceResponse getInvoiceStat(String billingID, String startDate, String endDate, String token) {
+		try {
+			Map<String, Object> lacq = invoiceProcessor.getInvoiceStat(billingID, startDate, endDate, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
 	public ServiceResponse loadAllPublishInvoiceBillingStatus(String start, String end, String billingID, String status,
 			int currentPage, int pageSize, String token) throws TransactionException {
 		try {
@@ -53,6 +62,15 @@ public class InvoiceHandler {
 		try {
 			Map<String, Object> lacq = invoiceProcessor.loadAllPublishInvoiceBilling(start, end, billingID, currentPage,
 					pageSize, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
+	public ServiceResponse getPublishInvoiceMember(String billingID, String username, String token) {
+		try {
+			Map<String, Object> lacq = invoiceProcessor.getPublishInvoiceMember(billingID, username, token);
 			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
 		} catch (TransactionException e) {
 			return ResponseBuilder.getStatus(e.getMessage(), null);

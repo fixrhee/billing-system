@@ -13,13 +13,13 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Billing</h1>
+            <h1>Billing Detail</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="index">Home</a></li>
-              <li class="breadcrumb-item">Billing</li>
-              <li class="breadcrumb-item active">Billing Detail</li>
+              <li class="breadcrumb-item"><a href="billing">Billing</a></li>
+              <li class="breadcrumb-item active">Detail</li>
             </ol>
           </div>
         </div>  
@@ -28,38 +28,126 @@
 
     <!-- Main content -->
     <section class="content">
+      
       <div class="row">
-        <div class="col-12">
+        <div class="col-md-6">
           <div class="card">
-            <div class="card-header">
-              <h3 class="card-title">Billing Detail</h3>
-            </div>
-   
             <!-- /.card-header -->
+   
             <div class="card-body">
+              <h3 class="card-title">Billing</h3>
+              <div>&nbsp;</div>
+              <div>&nbsp;</div>
       	     <table class="table">
-                  <thead>
                     <tr>
-                      <th style="width: 10px">#</th>
-                      <th>Task</th>
-                      <th>Progress</th>
-                      <th style="width: 40px">Label</th>
-                    </tr>
-                  </thead>
-                  <tbody>
-                    <tr>
-                      <td>1.</td>
+                      <td>Name</td>
+                      <td align="right">${billingName}</td>
  				    </tr>
- 			     </tbody>
-  		    </table>
+                    <tr>
+                      <td>Description</td>
+                      <td align="right">${description}</td>
+ 				    </tr>
+                    <tr>
+                      <td>Billing Cycle</td>
+                      <td align="right">${billingCycle} ${period}</td>
+ 				    </tr>
+                    <tr>
+                      <td>Outstanding</td>
+                      <td align="right"><span class='right badge badge-info'>${outstanding}</span></td>
+ 				    </tr>
+ 			 </table>
             </div>
-            <!-- /.card-body -->
-          </div>
-          <!-- /.card -->
+            <!-- /.card-body -->           
+           </div>        
+          <!-- /.card -->   
+          
         </div>
         <!-- /.col -->
+        
+        
+        <div class="col-md-6">
+          <div class="card">
+            <!-- /.card-header -->
+   
+            <div class="card-body">
+              <h3 class="card-title">Payment</h3>
+              <div>&nbsp;</div>
+              <div>&nbsp;</div>
+      	     <table class="table">
+                    <tr>
+                      <td>Period</td>
+                      <td align="right">${period}</td>
+ 				    </tr>
+                    <tr>
+                      <td>Total Member</td>
+                      <td align="right">${totalMember} member(s)</td>
+ 				    </tr>
+                    <tr>
+                      <td>Total Paid</td>
+                      <td align="right">${totalPaid} member(s)</td>
+ 				    </tr>
+                    <tr>
+                      <td>Total Unpaid</td>
+                      <td align="right">${totalUnpaid} member(s)</td>
+ 				    </tr>
+ 			 </table>
+            </div>
+            <!-- /.card-body -->           
+           </div>        
+          <!-- /.card -->   
+          
+             </div>
+        <!-- /.col -->
+        
+        </div>
+      <!-- /.row --> 
+      
+       <div class="row">
+        <div class="col-md-12">
+          <div class="card">
+      		 <div class="card-header">
+              <h3 class="card-title">Billing Member</h3>
+              <div class="card-tools">
+                <div class="input-group input-group-sm">
+                        <select class="custom-select">
+                          <option>Show All</option>
+                          <option>Filter By PAID</option>
+                          <option>Filter By UNPAID</option>
+                        </select>
+                  <div class="input-group-append">
+                    <div class="btn btn-primary">
+                      <i class="fas fa-search"></i>
+                    </div>
+                  </div>
+                </div>
+              </div>
+              <!-- /.card-tools -->
+            </div>
+            <!-- /.card-header -->   
+            
+            <div class="card-body">
+               <table id="memberTable" class="table table-bordered table-striped responsive nowrap">
+                <thead>
+                <tr>
+                  <th>Username</th>
+                  <th>Name</th>
+                  <th>Invoice Number</th>
+                  <th>Amount</th>
+                  <th>Status</th>
+                </tr>
+                </thead>
+              </table>
+                            
+            </div>
+            <!-- /.card-body -->        
+            </div>        
+          <!-- /.card -->   
+           </div>
+        <!-- /.col -->
+            
       </div>
-      <!-- /.row -->
+      <!-- /.row -->           
+      
     </section>
     <!-- /.content -->
   </div>
@@ -70,32 +158,26 @@
 		<!-- /.footer -->
 		
 <script>
- 		$("#billingTable")
+ 		$("#memberTable")
 				.DataTable(
 					{
 					 "processing" : true,
        				 "serverSide" : true,
-       				 "bFilter": false,
+       				 "bFilter": true,
        				 "bSort" : false,
        			     "ajax" : {
-       					 "url" : "billingData"
+       					 "url" : "billingStatusData?billingID=${billingID}"
  		              },
  			     	 "columns" : [{
+								"data" : "username"
+							}, {
 								"data" : "name"
 							}, {
-								"data" : "description"
+								"data" : "invoice"
 							}, {
-								"data" : "billingCycle"
+								"data" : "amount"
 							}, {
-								"data" : "outstanding"
-							}, {
-								"data" : "createdDate"
-							}, {
-								"data" : "id",
-								"render" : function ( data, type, row ) {
-        							 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Edit' /><i class='fa fa-edit'></i> " + 
-                   					 " <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Add Invoice' onclick='createInvoice(" + data + ");'/><i class='fa fa-plus-circle'></i>";
-               					 }	
+								"data" : "status"
 							}]
 					});
 </script>
@@ -106,17 +188,5 @@ function createInvoice(id){
 };
 </script>
 
-<c:if test="${not empty fn:trim(notification)}">	
-	<script type="text/javascript">
-	$(function(){
- 	 new PNotify({
-        title: '${title}',
-        text: '${message}',
-        type: '${notification}',
-        styling: 'bootstrap3'
-        });
-	});
-	</script>
-</c:if>
 </body>
 </html>

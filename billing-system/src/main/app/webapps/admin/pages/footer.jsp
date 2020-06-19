@@ -62,5 +62,7 @@
 	<script type="text/javascript" src="plugins/dynamicform/dynamic-form.js"></script>
 	<!-- Bootstrap4 Duallistbox -->
 	<script src="plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
+	<!-- FLOT CHARTS -->
+	<script src="plugins/flot/jquery.flot.js"></script>
 	
     

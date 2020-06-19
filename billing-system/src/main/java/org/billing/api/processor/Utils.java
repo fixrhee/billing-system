@@ -33,4 +33,12 @@ public class Utils {
 		return md5Hex;
 	}
 
+	public static String getCurrentMonthFirstDate() {
+		return LocalDate.ofEpochDay(System.currentTimeMillis() / (24 * 60 * 60 * 1000)).withDayOfMonth(1).toString();
+	}
+
+	public static String getCurrentMonthLastDate() {
+		return LocalDate.ofEpochDay(System.currentTimeMillis() / (24 * 60 * 60 * 1000)).plusMonths(1).withDayOfMonth(1)
+				.minusDays(1).toString();
+	}
 }

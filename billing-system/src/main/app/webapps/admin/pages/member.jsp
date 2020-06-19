@@ -74,7 +74,7 @@
 					{
 					 "processing" : true,
        				 "serverSide" : true,
-       				 "bFilter": false,
+       				 "bFilter": true,
        				 "bSort" : false,
      			     "ajax" : {
        					 "url" : "memberData"
