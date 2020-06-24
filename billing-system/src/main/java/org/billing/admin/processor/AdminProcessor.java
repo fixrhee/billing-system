@@ -156,6 +156,21 @@ public class AdminProcessor {
 		return new JSONObject(result);
 	}
 
+	public JSONObject loadMemberByID(String token, String id)
+			throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/member/" + id);
+		HttpGet get = new HttpGet(builder.build());
+
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+
+		return new JSONObject(result);
+	}
+
 	public JSONObject createMember(String name, String msisdn, String email, String address, String idcard,
 			String token) throws MalformedURLException, IOException {
 		String result = "";
@@ -305,6 +320,19 @@ public class AdminProcessor {
 		return new JSONObject(result);
 	}
 
+	public JSONObject loadInvoiceByID(String token, String id)
+			throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/invoice/" + id);
+		HttpGet get = new HttpGet(builder.build());
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+		return new JSONObject(result);
+	}
+
 	public String createInvoice(String token, String json)
 			throws MalformedURLException, IOException, URISyntaxException {
 		String result = "";
@@ -331,6 +359,23 @@ public class AdminProcessor {
 		builder.setParameter("currentPage", String.valueOf(currentPage))
 				.setParameter("pageSize", String.valueOf(pageSize)).setParameter("startDate", start)
 				.setParameter("endDate", end).setParameter("billingID", billingID);
+		HttpGet get = new HttpGet(builder.build());
+
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+		return new JSONObject(result);
+	}
+
+	public JSONObject loadPublishedInvoiceStatus(String token, String billingID, int currentPage, int pageSize,
+			String start, String end, String status) throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/invoice/publish/billing");
+		builder.setParameter("currentPage", String.valueOf(currentPage))
+				.setParameter("pageSize", String.valueOf(pageSize)).setParameter("startDate", start)
+				.setParameter("endDate", end).setParameter("billingID", billingID).setParameter("status", status);
 		HttpGet get = new HttpGet(builder.build());
 
 		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);

@@ -45,7 +45,7 @@
                 <tr>
                   <th>Name</th>
                   <th>Description</th>
-                  <th>Cycle</th>
+                  <th>Payment Due</th>
                   <th>Outstanding</th>
                   <th>Payment</th>
                   <th>Action</th>
@@ -103,13 +103,13 @@
 
 <script>
 function createInvoice(id){
-	window.location.href='createInvoice?billingID=' + id;
+	window.location.href='createInvoice?billingID=' + id ;
 };
 </script>
 
 <script>
 function viewDetail(id){
-	window.location.href='billingDetail?billingID=' + id;
+	window.location.href='billingDetail?billingID=' + id + '&filter=0';
 };
 </script>
 

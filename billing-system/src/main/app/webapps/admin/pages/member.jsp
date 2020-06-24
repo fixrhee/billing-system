@@ -90,12 +90,18 @@
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-                   					 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='View Detail' /><i class='fa fa-info-circle'></i> " + 
+                   					 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='View Detail' onclick='viewDetail(" + data + ");'/><i class='fa fa-info-circle'></i> " + 
                    					 " <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Edit' /><i class='far fa-edit'></i>";
                					 }	
 							}]
 					});
 	</script>
+
+<script>
+function viewDetail(id){
+	window.location.href='memberDetail?memberID=' + id;
+};
+</script>
 
 <c:if test="${not empty fn:trim(notification)}">	
 	<script type="text/javascript">

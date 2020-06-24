@@ -83,8 +83,10 @@ public class InvoiceProcessor {
 		}
 		Member m = memberRepository.getMemberByID(lacq.getMember().getId());
 		PublishInvoice pi = invoiceRepository.getPublishInvoiceByInvoice(lacq.getId(), b.getId());
+		Billing bill = billingRepository.getBillingByID(lacq.getBilling().getId(), b.getId()); 
 		lacq.setPublishInvoice(pi);
 		lacq.setMember(m);
+		lacq.setBilling(bill);
 		return lacq;
 	}
 

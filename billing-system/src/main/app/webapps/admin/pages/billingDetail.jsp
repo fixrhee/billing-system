@@ -24,6 +24,10 @@
           </div>
         </div>  
       </div><!-- /.container-fluid -->
+      <div align="right">
+        		<button type="button" class="btn btn-primary" onclick="window.location.href='createInvoice?billingID=${billingID}';"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add Invoice</button>
+               		<button type="button" class="btn btn-secondary" onclick="window.location.href='createInvoice';"><i class="fa fa-edit" aria-hidden="true"></i> Edit Billing</button>
+        </div>
     </section>
 
     <!-- Main content -->
@@ -38,21 +42,21 @@
               <h3 class="card-title">Billing</h3>
               <div>&nbsp;</div>
               <div>&nbsp;</div>
-      	     <table class="table">
+      	     <table class="table table-striped">
                     <tr>
-                      <td>Name</td>
+                      <td><b>Name</b></td>
                       <td align="right">${billingName}</td>
  				    </tr>
                     <tr>
-                      <td>Description</td>
+                      <td><b>Description</b></td>
                       <td align="right">${description}</td>
  				    </tr>
                     <tr>
-                      <td>Billing Cycle</td>
+                      <td><b>Payment Due</b></td>
                       <td align="right">${billingCycle} ${period}</td>
  				    </tr>
                     <tr>
-                      <td>Outstanding</td>
+                      <td><b>Outstanding</b></td>
                       <td align="right"><span class='right badge badge-info'>${outstanding}</span></td>
  				    </tr>
  			 </table>
@@ -73,22 +77,22 @@
               <h3 class="card-title">Payment</h3>
               <div>&nbsp;</div>
               <div>&nbsp;</div>
-      	     <table class="table">
+      	     <table class="table table-striped">
                     <tr>
-                      <td>Period</td>
+                      <td><b>Periode</b></td>
                       <td align="right">${period}</td>
  				    </tr>
                     <tr>
-                      <td>Total Member</td>
-                      <td align="right">${totalMember} member(s)</td>
+                      <td><b>Total Member</b></td>
+                      <td align="right">${totalMember}</td>
  				    </tr>
                     <tr>
-                      <td>Total Paid</td>
-                      <td align="right">${totalPaid} member(s)</td>
+                      <td><b>Total Paid</b></td>
+                      <td align="right">${totalPaid}</td>
  				    </tr>
                     <tr>
-                      <td>Total Unpaid</td>
-                      <td align="right">${totalUnpaid} member(s)</td>
+                      <td><b>Total Unpaid</b></td>
+                      <td align="right">${totalUnpaid}</td>
  				    </tr>
  			 </table>
             </div>
@@ -109,13 +113,13 @@
               <h3 class="card-title">Billing Member</h3>
               <div class="card-tools">
                 <div class="input-group input-group-sm">
-                        <select class="custom-select">
-                          <option>Show All</option>
-                          <option>Filter By PAID</option>
-                          <option>Filter By UNPAID</option>
+                        <select class="custom-select" id="filter">
+                          <option value="0">Show All</option>
+                          <option value="1">Filter By PAID</option>
+                          <option value="2">Filter By UNPAID</option>
                         </select>
                   <div class="input-group-append">
-                    <div class="btn btn-primary">
+                    <div class="btn btn-primary" onclick="searchFilter(${billingID});">
                       <i class="fas fa-search"></i>
                     </div>
                   </div>
@@ -166,7 +170,11 @@
        				 "bFilter": true,
        				 "bSort" : false,
        			     "ajax" : {
-       					 "url" : "billingStatusData?billingID=${billingID}"
+       					 "url" : "billingStatusData",
+       					  data: { 
+      					  "billingID": ${billingID}, 
+     					  "filter": ${filter}
+       					  }
  		              },
  			     	 "columns" : [{
 								"data" : "username"
@@ -186,6 +194,13 @@
 function createInvoice(id){
 	window.location.href='createInvoice?billingID=' + id;
 };
+</script>
+<script>
+  function searchFilter(id){
+   // Selecting the input element and get its value 
+   var inputVal = document.getElementById("filter").value;       
+   window.location.href='billingDetail?billingID=' + id +'&filter=' +inputVal;
+  }
 </script>
 
 </body>

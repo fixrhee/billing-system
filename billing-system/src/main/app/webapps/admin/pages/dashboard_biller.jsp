@@ -24,43 +24,9 @@
 
 			<!-- Main content -->
 			<section class="content">
-				<div class="container-fluid">
-	     			<div class="row">
-						<div class="col-lg-6 col-12">
-							<!-- small box -->
-							<div class="small-box bg-primary">
-								<div class="inner">
-									<p>Balance</p>
-									<h3 align="center">Rp. 1.234.439,-</h3>
-								</div>
-								<div class="icon">
-									<i class="fas fa-download"></i>
-								</div>
-								<a href="#" class="small-box-footer">More info <i
-									class="fas fa-arrow-circle-right"></i></a>
-							</div>
-						</div>
-						
-						<div class="col-lg-6 col-12">
-							<!-- small box -->
-							<div class="small-box bg-secondary">
-								<div class="inner">
-									<p>Settled</p>
-									<h3 align="center">Rp. 0,-</h3>
-								</div>
-								<div class="icon">
-									<i class="fas fa-upload"></i>
-								</div>
-								<a href="#" class="small-box-footer">More info <i
-									class="fas fa-arrow-circle-right"></i></a>
-							</div>
-						</div>
-						<!-- /row -->
-					</div>
-						
-				<h5 class="mb-2">General Info</h5>
-	    			<div class="row">
-	    			
+			<div class="container-fluid">
+	    		<div class="row">
+	    		
 	    		<div class="col-lg-3 col-6">
             <!-- small card -->
             <div class="small-box bg-info">
@@ -124,7 +90,7 @@
                 <p>Unpaid</p>
               </div>
               <div class="icon">
-                <i class="fas fa-ban"></i>
+                <i class="fas fa-times-circle"></i>
               </div>
               <a href="#" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
@@ -133,9 +99,134 @@
           </div>
    		 <!-- /.col -->
    		 </div>
+   		 <!-- /.row -->
    		 
- 		
-		
+   		  <div class="row">
+	      <div class="col-md-6">
+         <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Billing Payment</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body p-0">
+                <table class="table">
+                  <thead>
+                    <tr>
+                      <th>Billing Name</th>
+                      <th>Payment</th>
+                      <th style="width: 40px">Label</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Update software</td>
+                      <td>
+                        <div class="progress progress-xs">
+                          <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-danger">55%</span></td>
+                    </tr>
+                    <tr>
+                      <td>Clean database</td>
+                      <td>
+                        <div class="progress progress-xs">
+                          <div class="progress-bar bg-warning" style="width: 70%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-warning">70%</span></td>
+                    </tr>
+                    <tr>
+                      <td>Cron job running</td>
+                      <td>
+                        <div class="progress progress-xs progress-striped active">
+                          <div class="progress-bar bg-primary" style="width: 30%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-primary">30%</span></td>
+                    </tr>
+                    <tr>
+                      <td>Fix and squish bugs</td>
+                      <td>
+                        <div class="progress progress-xs progress-striped active">
+                          <div class="progress-bar bg-success" style="width: 90%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-success">90%</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+       
+        <div class="col-md-6">
+        <div class="card">
+              <div class="card-header">
+                <h3 class="card-title">Last Transaction</h3>
+              </div>
+              <!-- /.card-header -->
+              <div class="card-body p-0">
+                <table class="table table-striped">
+                  <thead>
+                    <tr>
+                      <th>From/To</th>
+                      <th>Transaction Type</th>
+                      <th style="width: 40px">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td>Update software</td>
+                      <td>
+                        <div class="progress progress-xs">
+                          <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-danger">55%</span></td>
+                    </tr>
+                    <tr>
+                      <td>Clean database</td>
+                      <td>
+                        <div class="progress progress-xs">
+                          <div class="progress-bar bg-warning" style="width: 70%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-warning">70%</span></td>
+                    </tr>
+                    <tr>
+                      <td>Cron job running</td>
+                      <td>
+                        <div class="progress progress-xs progress-striped active">
+                          <div class="progress-bar bg-primary" style="width: 30%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-primary">30%</span></td>
+                    </tr>
+                    <tr>
+                      <td>Fix and squish bugs</td>
+                      <td>
+                        <div class="progress progress-xs progress-striped active">
+                          <div class="progress-bar bg-success" style="width: 90%"></div>
+                        </div>
+                      </td>
+                      <td><span class="badge bg-success">90%</span></td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+              <!-- /.card-body -->
+            </div>
+            <!-- /.card -->
+          </div>
+          <!-- /.col -->
+             
+        </div>
+      <!-- /.row --> 
+     	
       </div>
       <!-- /.container-fluid -->
     </section>

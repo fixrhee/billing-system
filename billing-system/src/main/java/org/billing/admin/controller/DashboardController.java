@@ -117,6 +117,55 @@ public class DashboardController {
 		}
 	}
 
+	@RequestMapping(value = "/memberDetail", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView memberDetail(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "memberID") String memberID, HttpServletResponse response, Model model) {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			JSONObject memberDetail = adminProcessor.loadMemberByID(sessionID, memberID);
+			String username = memberDetail.getJSONObject("payload").getString("username");
+			String name = memberDetail.getJSONObject("payload").getString("name");
+			String email = memberDetail.getJSONObject("payload").getString("email");
+			String address = memberDetail.getJSONObject("payload").getString("address");
+			String idcard = memberDetail.getJSONObject("payload").getString("idCard");
+			String msisdn = memberDetail.getJSONObject("payload").getString("msisdn");
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "member");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+
+			model.addAttribute("memberUsername", username);
+			model.addAttribute("memberName", name);
+			model.addAttribute("memberEmail", email);
+			model.addAttribute("memberAddress", address);
+			model.addAttribute("memberIDCard", idcard);
+			model.addAttribute("memberMsisdn", msisdn);
+
+			return new ModelAndView("memberDetail");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("httpResponseCode", "500");
+			model.addAttribute("status", "Oops !");
+			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
 	@RequestMapping(value = "/createMember", method = { RequestMethod.POST, RequestMethod.GET })
 	public ModelAndView createMember(
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
@@ -424,8 +473,8 @@ public class DashboardController {
 	@RequestMapping(value = "/billingDetail", method = { RequestMethod.POST, RequestMethod.GET })
 	public ModelAndView billingDetail(
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
-			@RequestParam(value = "billingID", required = true) String billingID, HttpServletResponse response,
-			Model model) {
+			@RequestParam(value = "billingID", required = true) String billingID,
+			@RequestParam(value = "filter") String filter, HttpServletResponse response, Model model) {
 		try {
 			IMap<String, String> memberMap = instance.getMap("Member");
 			String member = memberMap.get(sessionID);
@@ -461,6 +510,7 @@ public class DashboardController {
 			model.addAttribute("unread", unread);
 
 			model.addAttribute("billingID", billingID);
+			model.addAttribute("filter", filter);
 			model.addAttribute("billingName", billingName);
 			model.addAttribute("description", description);
 			model.addAttribute("billingCycle", cycle);
@@ -617,7 +667,8 @@ public class DashboardController {
 			jsonData.put("id", payload.getJSONArray("body").getJSONObject(i).get("id"));
 			jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).get("name"));
 			jsonData.put("description", payload.getJSONArray("body").getJSONObject(i).get("description"));
-			jsonData.put("billingCycle", payload.getJSONArray("body").getJSONObject(i).get("billingCycle"));
+			jsonData.put("billingCycle", payload.getJSONArray("body").getJSONObject(i).get("billingCycle") + " "
+					+ Utils.getCurrentMonthAndYear());
 			boolean outstanding = payload.getJSONArray("body").getJSONObject(i).getBoolean("outstanding");
 			String ot = outstanding == true ? "<span class='right badge badge-success'>True</span>"
 					: "<span class='right badge badge-danger'>False</span>";
@@ -662,7 +713,8 @@ public class DashboardController {
 	public String billingPaidData(
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
 			@RequestParam(value = "start") Integer start, @RequestParam(value = "length") Integer length,
-			@RequestParam(value = "billingID") String billingID, @RequestParam(value = "search[value]") String search)
+			@RequestParam(value = "billingID") String billingID, @RequestParam(value = "filter") String filter,
+			@RequestParam(value = "search[value]") String search)
 			throws IOException, URISyntaxException, ParseException {
 		Map<String, Object> jsonMap = new HashMap<String, Object>();
 		List<Object> jsonList = new LinkedList<Object>();
@@ -675,8 +727,13 @@ public class DashboardController {
 				JSONObject data = adminProcessor.loadPublishedInvoiceByMember(sessionID, billingID, search);
 				if (data.has("payload")) {
 					Map<String, Object> jsonData = new HashMap<String, Object>();
-					jsonData.put("username", data.getJSONObject("payload").getJSONObject("body").getJSONObject("member")
-							.getString("username"));
+					jsonData.put("username",
+							"<a href='memberDetail?memberID="
+									+ data.getJSONObject("payload").getJSONObject("body").getJSONObject("member")
+											.getInt("id")
+									+ "'>" + data.getJSONObject("payload").getJSONObject("body").getJSONObject("member")
+											.getString("username")
+									+ "</a>");
 					jsonData.put("name", data.getJSONObject("payload").getJSONObject("body").getJSONObject("member")
 							.getString("name"));
 					jsonData.put("amount", data.getJSONObject("payload").getJSONObject("body").getDouble("amount"));
@@ -694,32 +751,111 @@ public class DashboardController {
 				}
 			}
 		} else {
-			JSONObject data = adminProcessor.loadPublishedInvoice(sessionID, billingID, start, length,
-					Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate());
+			if (filter.equalsIgnoreCase("0")) {
+				JSONObject data = adminProcessor.loadPublishedInvoice(sessionID, billingID, start, length,
+						Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate());
 
-			if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
-				JSONObject payload = data.getJSONObject("payload");
-				for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
-					Map<String, Object> jsonData = new HashMap<String, Object>();
-					jsonData.put("username", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
-							.getString("username"));
-					jsonData.put("name",
-							payload.getJSONArray("body").getJSONObject(i).getJSONObject("member").getString("name"));
-					jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
-					jsonData.put("invoice", payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
-					if (payload.getJSONArray("body").getJSONObject(i).getString("status").equalsIgnoreCase("PAID")) {
-						jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
-					} else {
-						jsonData.put("status", "<span class='right badge badge-danger'>UNPAID</span>");
+				if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
+					JSONObject payload = data.getJSONObject("payload");
+					for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+						Map<String, Object> jsonData = new HashMap<String, Object>();
+						jsonData.put("username",
+								"<a href='memberDetail?memberID="
+										+ payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+												.getInt("id")
+										+ "'>" + payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+												.getString("username")
+										+ "</a>");
+						jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+								.getString("name"));
+						jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
+						jsonData.put("invoice",
+								payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
+						if (payload.getJSONArray("body").getJSONObject(i).getString("status")
+								.equalsIgnoreCase("PAID")) {
+							jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
+						} else {
+							jsonData.put("status", "<span class='right badge badge-danger'>UNPAID</span>");
+						}
+						jsonList.add(jsonData);
 					}
-					jsonList.add(jsonData);
+					jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+					jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+
+				} else {
+					jsonMap.put("recordsTotal", 0);
+					jsonMap.put("recordsFiltered", 0);
 				}
-				jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
-				jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+			} else if (filter.equalsIgnoreCase("1")) {
+				JSONObject data = adminProcessor.loadPublishedInvoiceStatus(sessionID, billingID, start, length,
+						Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate(), "PAID");
+				if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
+					JSONObject payload = data.getJSONObject("payload");
+					for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+						Map<String, Object> jsonData = new HashMap<String, Object>();
+						jsonData.put("username",
+								"<a href='memberDetail?memberID="
+										+ payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+												.getInt("id")
+										+ "'>" + payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+												.getString("username")
+										+ "</a>");
+						jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+								.getString("name"));
+						jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
+						jsonData.put("invoice",
+								payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
+						if (payload.getJSONArray("body").getJSONObject(i).getString("status")
+								.equalsIgnoreCase("PAID")) {
+							jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
+						} else {
+							jsonData.put("status", "<span class='right badge badge-danger'>UNPAID</span>");
+						}
+						jsonList.add(jsonData);
+					}
+					jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+					jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+
+				} else {
+					jsonMap.put("recordsTotal", 0);
+					jsonMap.put("recordsFiltered", 0);
+				}
 			} else {
-				jsonMap.put("recordsTotal", 0);
-				jsonMap.put("recordsFiltered", 0);
+				JSONObject data = adminProcessor.loadPublishedInvoiceStatus(sessionID, billingID, start, length,
+						Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate(), "UNPAID");
+				if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
+					JSONObject payload = data.getJSONObject("payload");
+					for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+						Map<String, Object> jsonData = new HashMap<String, Object>();
+						jsonData.put("username",
+								"<a href='memberDetail?memberID="
+										+ payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+												.getInt("id")
+										+ "'>" + payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+												.getString("username")
+										+ "</a>");
+						jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
+								.getString("name"));
+						jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
+						jsonData.put("invoice",
+								payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
+						if (payload.getJSONArray("body").getJSONObject(i).getString("status")
+								.equalsIgnoreCase("PAID")) {
+							jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
+						} else {
+							jsonData.put("status", "<span class='right badge badge-danger'>UNPAID</span>");
+						}
+						jsonList.add(jsonData);
+					}
+					jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+					jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+
+				} else {
+					jsonMap.put("recordsTotal", 0);
+					jsonMap.put("recordsFiltered", 0);
+				}
 			}
+
 		}
 		jsonMap.put("data", jsonList);
 
@@ -758,6 +894,190 @@ public class DashboardController {
 					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
 			return new ModelAndView("page_exception");
 		}
+	}
+
+	@RequestMapping(value = "/invoiceDetail", method = RequestMethod.GET)
+	public ModelAndView invoiceDetail(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "invoiceID") String invoiceID, HttpServletResponse response, Model model) {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			JSONObject invoice = adminProcessor.loadInvoiceByID(sessionID, invoiceID);
+			String billerName = memberInfo.getJSONObject("payload").getString("name");
+			String billerEmail = memberInfo.getJSONObject("payload").getString("email");
+			String billerAddress = memberInfo.getJSONObject("payload").getString("address");
+
+			String billerMsisdn = memberInfo.getJSONObject("payload").getString("msisdn");
+			String memberName = invoice.getJSONObject("payload").getJSONObject("member").getString("name");
+			String memberEmail = invoice.getJSONObject("payload").getJSONObject("member").getString("email");
+			String memberAddress = invoice.getJSONObject("payload").getJSONObject("member").getString("address");
+			String memberMsisdn = invoice.getJSONObject("payload").getJSONObject("member").getString("msisdn");
+			String invoiceNo = invoice.getJSONObject("payload").getJSONObject("publishInvoice")
+					.getString("invoiceNumber");
+			String paymentCode = invoice.getJSONObject("payload").getJSONObject("publishInvoice")
+					.getString("paymentCode");
+			Double amount = invoice.getJSONObject("payload").getJSONObject("publishInvoice").getDouble("amount");
+
+			String status = invoice.getJSONObject("payload").getJSONObject("publishInvoice").getString("status");
+			Integer paymentDue = invoice.getJSONObject("payload").getJSONObject("billing").getInt("billingCycle");
+			Integer billingID = invoice.getJSONObject("payload").getJSONObject("billing").getInt("id");
+
+
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "invoice");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", billerName);
+			model.addAttribute("email", billerEmail);
+			model.addAttribute("address", billerAddress);
+			model.addAttribute("msisdn", billerMsisdn);
+			model.addAttribute("memberName", memberName);
+			model.addAttribute("memberEmail", memberEmail);
+			model.addAttribute("memberAddress", memberAddress);
+			model.addAttribute("memberMsisdn", memberMsisdn);
+			model.addAttribute("billingID", billingID);
+			model.addAttribute("invoiceID", invoiceID);
+			model.addAttribute("invoiceNo", invoiceNo);
+			model.addAttribute("paymentCode", paymentCode);
+			model.addAttribute("paymentDue", paymentDue + "/" + Utils.getCurrentMonth() + "/" + Utils.getCurrentYear());
+			model.addAttribute("amount", Utils.formatAmount(amount.intValue()));
+
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+
+			return new ModelAndView("invoiceDetail");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("httpResponseCode", "500");
+			model.addAttribute("status", "Oops !");
+			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
+	@RequestMapping(value = "/viewInvoice", method = { RequestMethod.POST, RequestMethod.GET })
+	public ModelAndView viewInvoice(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "invoiceID") String invoiceID, HttpServletResponse response, Model model) {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			JSONObject invoice = adminProcessor.loadInvoiceByID(sessionID, invoiceID);
+			String billerName = memberInfo.getJSONObject("payload").getString("name");
+			String billerEmail = memberInfo.getJSONObject("payload").getString("email");
+			String billerAddress = memberInfo.getJSONObject("payload").getString("address");
+
+			String billerMsisdn = memberInfo.getJSONObject("payload").getString("msisdn");
+
+			if (billerMsisdn.substring(0, 2).equalsIgnoreCase("62")) {
+				billerMsisdn = "(+62) " + billerMsisdn.substring(2);
+			} else if (billerMsisdn.substring(0, 1).equalsIgnoreCase("0")) {
+				billerMsisdn = "(+62) " + billerMsisdn.substring(1);
+			}
+
+			String memberName = invoice.getJSONObject("payload").getJSONObject("member").getString("name");
+			String memberEmail = invoice.getJSONObject("payload").getJSONObject("member").getString("email");
+			String memberAddress = invoice.getJSONObject("payload").getJSONObject("member").getString("address");
+
+			String memberMsisdn = invoice.getJSONObject("payload").getJSONObject("member").getString("msisdn");
+
+			if (memberMsisdn.substring(0, 2).equalsIgnoreCase("62")) {
+				memberMsisdn = "(+62) " + memberMsisdn.substring(2);
+			} else if (memberMsisdn.substring(0, 1).equalsIgnoreCase("0")) {
+				memberMsisdn = "(+62) " + memberMsisdn.substring(1);
+			}
+
+			String invoiceNo = invoice.getJSONObject("payload").getJSONObject("publishInvoice")
+					.getString("invoiceNumber");
+			String paymentCode = invoice.getJSONObject("payload").getJSONObject("publishInvoice")
+					.getString("paymentCode");
+			Double amount = invoice.getJSONObject("payload").getJSONObject("publishInvoice").getDouble("amount");
+
+			String status = invoice.getJSONObject("payload").getJSONObject("publishInvoice").getString("status");
+			Integer paymentDue = invoice.getJSONObject("payload").getJSONObject("billing").getInt("billingCycle");
+			Integer billingID = invoice.getJSONObject("payload").getJSONObject("billing").getInt("id");
+
+			String desc = invoice.getJSONObject("payload").getString("description");
+			JSONObject jsonDesc = new JSONObject(desc);
+			JSONArray items = jsonDesc.getJSONArray("items");
+
+			StringBuffer sb = new StringBuffer();
+			for (int i = 0; i < items.length(); i++) {
+				sb.append(
+						"<tr><td>" + (i + 1) + ".</td><td>" + items.getJSONObject(i).getString("item") + "</td><td>Rp. "
+								+ Utils.formatAmount(Integer.parseInt(items.getJSONObject(i).getString("amount")))
+								+ ",-</td></tr>");
+			}
+
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "invoice");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", billerName);
+			model.addAttribute("email", billerEmail);
+			model.addAttribute("address", billerAddress);
+			model.addAttribute("msisdn", billerMsisdn);
+			model.addAttribute("memberName", memberName);
+			model.addAttribute("memberEmail", memberEmail);
+			model.addAttribute("memberAddress", memberAddress);
+			model.addAttribute("memberMsisdn", memberMsisdn);
+			model.addAttribute("billingID", billingID);
+			model.addAttribute("invoiceID", invoiceID);
+			model.addAttribute("invoiceNo", invoiceNo);
+			model.addAttribute("paymentCode", paymentCode);
+			model.addAttribute("paymentDue", paymentDue + "/" + Utils.getCurrentMonth() + "/" + Utils.getCurrentYear());
+			model.addAttribute("table", sb.toString());
+			model.addAttribute("amount", Utils.formatAmount(amount.intValue()));
+
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+
+			return new ModelAndView("viewInvoice");
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("httpResponseCode", "500");
+			model.addAttribute("status", "Oops !");
+			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+	}
+
+	@RequestMapping(value = "/invoicePrint", method = RequestMethod.GET)
+	public ModelAndView invoicePrint(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "invoiceID") String invoiceID, HttpServletResponse response, Model model) {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("httpResponseCode", "500");
+			model.addAttribute("status", "Oops !");
+			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+		return new ModelAndView("invoicePrint");
 	}
 
 	@ResponseBody

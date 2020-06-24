@@ -64,5 +64,10 @@
 	<script src="plugins/bootstrap4-duallistbox/jquery.bootstrap-duallistbox.min.js"></script>
 	<!-- FLOT CHARTS -->
 	<script src="plugins/flot/jquery.flot.js"></script>
+		<!-- date-range-picker -->
+	<script src="plugins/daterangepicker/daterangepicker.js"></script>
+	<!-- InputMask -->
+	<script src="plugins/moment/moment.min.js"></script>
+	<script src="plugins/inputmask/min/jquery.inputmask.bundle.min.js"></script>
 	
     

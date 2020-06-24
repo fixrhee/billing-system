@@ -5,7 +5,7 @@
 <head>
 <meta charset="utf-8">
 <meta http-equiv="X-UA-Compatible" content="IE=edge">
-<title>AdminVS | Dashboard</title>
+<title>AdminBilling | Dashboard</title>
 <!-- Tell the browser to be responsive to screen width -->
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Font Awesome -->
@@ -66,7 +66,7 @@
 					href="#" role="button"><i class="fas fa-bars"></i></a></li>
 			</ul>
 
-			<!-- SEARCH FORM >
+			<!-- SEARCH FORM>
 			<form class="form-inline ml-3">
 				<div class="input-group input-group-sm">
 					<input class="form-control form-control-navbar" type="search"

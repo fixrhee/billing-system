@@ -89,12 +89,25 @@
 							}, {
 								"data" : "id",
 								"render" : function ( data, type, row ) {
-        					 return "<button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='View Detail' /><i class='fa fa-info-circle'></i> " + 
-                   					 " <button type='button' class='btn btn-default btn-sm checkbox-toggle' data-toggle='tooltip' title='Edit' /><i class='far fa-edit'></i>";
+        							 return "<button type='button' class='btn btn-default btn-sm' data-toggle='tooltip' title='View Detail' onclick='viewDetail(" + data + ");'/><i class='fa fa-info-circle'></i> " + 
+                   				" <button type='button' class='btn btn-default btn-sm' data-toggle='tooltip' title='Edit' /><i class='far fa-edit'></i>" + 
+                   				" <button type='button' class='btn btn-default btn-sm' data-toggle='tooltip' title='View Invoice'  onclick='viewInvoice(" + data + ");'/><i class='far fa-eye'></i>";
                					 }	
 							}]
 					});
 	</script>
+	
+<script>
+function viewInvoice(id){
+	window.location.href='viewInvoice?invoiceID=' + id;
+};
+</script>
+
+<script>
+function viewDetail(id){
+	window.location.href='invoiceDetail?invoiceID=' + id;
+};
+</script>	
 
 <c:if test="${not empty fn:trim(notification)}">	
 	<script type="text/javascript">

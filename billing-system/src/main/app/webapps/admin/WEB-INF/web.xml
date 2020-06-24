@@ -32,6 +32,7 @@
 		<url-pattern>/member</url-pattern>
 		<url-pattern>/memberData</url-pattern>
 		<url-pattern>/memberBillingData</url-pattern>
+		<url-pattern>/memberDetail</url-pattern>
 		<url-pattern>/createMember</url-pattern>
 		<url-pattern>/submitMember</url-pattern>
 		<url-pattern>/submitMemberResult</url-pattern>
@@ -45,7 +46,10 @@
 		<url-pattern>/billingDetail</url-pattern>
 		<url-pattern>/billingStatusData</url-pattern>
 		<url-pattern>/invoice</url-pattern>
+		<url-pattern>/invoiceDetail</url-pattern>
+		<url-pattern>/viewInvoice</url-pattern>
 		<url-pattern>/invoiceData</url-pattern>
+		<url-pattern>/invoicePrint</url-pattern>
 		<url-pattern>/createInvoice</url-pattern>
 		<url-pattern>/submitInvoice</url-pattern>
 		<url-pattern>/submitInvoiceResult</url-pattern>
