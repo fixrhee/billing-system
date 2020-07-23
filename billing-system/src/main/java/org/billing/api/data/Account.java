@@ -2,13 +2,13 @@ package org.billing.api.data;
 
 import java.util.Date;
 
-public class TransferType {
+public class Account {
 
 	private Integer id;
 	private String name;
-	private Integer fromAccountID;
-	private Integer toAccountID;
+	private Boolean systemAccount;
 	private Date createdDate;
+	
 
 	public String getName() {
 		return name;
@@ -26,20 +26,12 @@ public class TransferType {
 		this.id = id;
 	}
 
-	public Integer getFromAccountID() {
-		return fromAccountID;
+	public Boolean isSystemAccount() {
+		return systemAccount;
 	}
 
-	public void setFromAccountID(Integer fromAccountID) {
-		this.fromAccountID = fromAccountID;
-	}
-
-	public Integer getToAccountID() {
-		return toAccountID;
-	}
-
-	public void setToAccountID(Integer toAccountID) {
-		this.toAccountID = toAccountID;
+	public void setSystemAccount(Boolean systemAccount) {
+		this.systemAccount = systemAccount;
 	}
 
 	public Date getCreatedDate() {

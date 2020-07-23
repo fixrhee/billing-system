@@ -53,8 +53,8 @@ public class Utils {
 	}
 
 	public static Integer getCurrentMonth() {
-		Calendar mCalendar = Calendar.getInstance();
-		int month = mCalendar.get(Calendar.MONTH);
+		LocalDate today = LocalDate.now();
+		int month = today.getMonthValue();
 		return month;
 	}
 
@@ -64,7 +64,7 @@ public class Utils {
 		return year;
 	}
 
-	public static String formatAmount(int amount) {
-		return String.format("%,d", amount).replace(',', '.');
+	public static String formatAmount(int d) {
+		return String.format("%,d", d).replace(',', '.');
 	}
 }

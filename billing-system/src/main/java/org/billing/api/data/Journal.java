@@ -6,12 +6,16 @@ import java.util.Date;
 public class Journal {
 
 	private Integer id;
-	private Member member;
+	private Member fromMember;
+	private Member toMember;
+	private Account fromAccount;
+	private Account toAccount;
 	private TransferType transferType;
+	private String traceNo;
 	private String referenceNo;
 	private BigDecimal amount;
 	private String description;
-	private String status;
+	private String transactionState;
 	private String transactionNumber;
 	private Date transactionDate;
 
@@ -55,14 +59,6 @@ public class Journal {
 		this.description = description;
 	}
 
-	public String getStatus() {
-		return status;
-	}
-
-	public void setStatus(String status) {
-		this.status = status;
-	}
-
 	public String getTransactionNumber() {
 		return transactionNumber;
 	}
@@ -79,12 +75,52 @@ public class Journal {
 		this.transactionDate = transactionDate;
 	}
 
-	public Member getMember() {
-		return member;
+	public String getTransactionState() {
+		return transactionState;
 	}
 
-	public void setMember(Member member) {
-		this.member = member;
+	public void setTransactionState(String transactionState) {
+		this.transactionState = transactionState;
+	}
+
+	public Member getFromMember() {
+		return fromMember;
+	}
+
+	public void setFromMember(Member fromMember) {
+		this.fromMember = fromMember;
+	}
+
+	public Member getToMember() {
+		return toMember;
+	}
+
+	public void setToMember(Member toMember) {
+		this.toMember = toMember;
+	}
+
+	public String getTraceNo() {
+		return traceNo;
+	}
+
+	public void setTraceNo(String traceNo) {
+		this.traceNo = traceNo;
+	}
+
+	public Account getFromAccount() {
+		return fromAccount;
+	}
+
+	public void setFromAccount(Account fromAccount) {
+		this.fromAccount = fromAccount;
+	}
+
+	public Account getToAccount() {
+		return toAccount;
+	}
+
+	public void setToAccount(Account toAccount) {
+		this.toAccount = toAccount;
 	}
 
 }

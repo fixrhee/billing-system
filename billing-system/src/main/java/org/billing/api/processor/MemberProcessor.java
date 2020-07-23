@@ -83,6 +83,15 @@ public class MemberProcessor {
 		return m;
 	}
 
+	public Member getMemberByUsername(String username) throws TransactionException {
+
+		Member m = memberRepository.getMemberByUsername(username);
+		if (m == null) {
+			throw new TransactionException(Status.MEMBER_NOT_FOUND);
+		}
+		return m;
+	}
+
 	public void createMember(Member member, String token) throws TransactionException {
 		Member b = this.Authenticate(token);
 		if (b == null) {

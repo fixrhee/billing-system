@@ -77,6 +77,17 @@ public class InvoiceHandler {
 		}
 	}
 
+	public ServiceResponse loadPublishInvoiceHistory(String start, String end, String invoiceID, int currentPage,
+			int pageSize, String token) throws TransactionException {
+		try {
+			Map<String, Object> lacq = invoiceProcessor.loadPublishInvoiceHistory(start, end, invoiceID, currentPage,
+					pageSize, token);
+			return ResponseBuilder.getStatus(Status.PROCESSED, lacq);
+		} catch (TransactionException e) {
+			return ResponseBuilder.getStatus(e.getMessage(), null);
+		}
+	}
+
 	public ServiceResponse getInvoiceByID(String id, String token) {
 		try {
 			Invoice lacq = invoiceProcessor.getInvoiceByID(id, token);

@@ -38,7 +38,7 @@
               <div class="icon">
                 <i class="fas fa-user"></i>
               </div>
-              <a href="#" class="small-box-footer">
+              <a href="member" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
@@ -56,7 +56,7 @@
               <div class="icon">
                 <i class="fas fa-arrow-circle-up"></i>
               </div>
-              <a href="#" class="small-box-footer">
+              <a href="invoice" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
@@ -74,7 +74,7 @@
               <div class="icon">
                 <i class="fas fa-check-circle"></i>
               </div>
-              <a href="#" class="small-box-footer">
+              <a href="billing" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
@@ -92,7 +92,7 @@
               <div class="icon">
                 <i class="fas fa-times-circle"></i>
               </div>
-              <a href="#" class="small-box-footer">
+              <a href="billing" class="small-box-footer">
                 More info <i class="fas fa-arrow-circle-right"></i>
               </a>
             </div>
@@ -109,51 +109,17 @@
               </div>
               <!-- /.card-header -->
               <div class="card-body p-0">
-                <table class="table">
+                <table id="billingTable" class="table">
                   <thead>
                     <tr>
                       <th>Billing Name</th>
+                      <th>Description</th>
                       <th>Payment</th>
-                      <th style="width: 40px">Label</th>
+                      <th style="width: 40px"></th>
                     </tr>
                   </thead>
                   <tbody>
-                    <tr>
-                      <td>Update software</td>
-                      <td>
-                        <div class="progress progress-xs">
-                          <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-danger">55%</span></td>
-                    </tr>
-                    <tr>
-                      <td>Clean database</td>
-                      <td>
-                        <div class="progress progress-xs">
-                          <div class="progress-bar bg-warning" style="width: 70%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-warning">70%</span></td>
-                    </tr>
-                    <tr>
-                      <td>Cron job running</td>
-                      <td>
-                        <div class="progress progress-xs progress-striped active">
-                          <div class="progress-bar bg-primary" style="width: 30%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-primary">30%</span></td>
-                    </tr>
-                    <tr>
-                      <td>Fix and squish bugs</td>
-                      <td>
-                        <div class="progress progress-xs progress-striped active">
-                          <div class="progress-bar bg-success" style="width: 90%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-success">90%</span></td>
-                    </tr>
+                 	${lastBilling}
                   </tbody>
                 </table>
               </div>
@@ -173,49 +139,13 @@
                 <table class="table table-striped">
                   <thead>
                     <tr>
+                      <th>Date</th>
                       <th>From/To</th>
-                      <th>Transaction Type</th>
-                      <th style="width: 40px">Amount</th>
+                      <th>Transaction</th>
+                      <th>Amount</th>
                     </tr>
                   </thead>
-                  <tbody>
-                    <tr>
-                      <td>Update software</td>
-                      <td>
-                        <div class="progress progress-xs">
-                          <div class="progress-bar progress-bar-danger" style="width: 55%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-danger">55%</span></td>
-                    </tr>
-                    <tr>
-                      <td>Clean database</td>
-                      <td>
-                        <div class="progress progress-xs">
-                          <div class="progress-bar bg-warning" style="width: 70%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-warning">70%</span></td>
-                    </tr>
-                    <tr>
-                      <td>Cron job running</td>
-                      <td>
-                        <div class="progress progress-xs progress-striped active">
-                          <div class="progress-bar bg-primary" style="width: 30%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-primary">30%</span></td>
-                    </tr>
-                    <tr>
-                      <td>Fix and squish bugs</td>
-                      <td>
-                        <div class="progress progress-xs progress-striped active">
-                          <div class="progress-bar bg-success" style="width: 90%"></div>
-                        </div>
-                      </td>
-                      <td><span class="badge bg-success">90%</span></td>
-                    </tr>
-                  </tbody>
+                 	<tbody>${lastTrx}</tbody>
                 </table>
               </div>
               <!-- /.card-body -->
@@ -233,3 +163,7 @@
     <!-- /.content -->
   </div>
   <!-- /.content-wrapper -->
+  
+<!-- footer -->
+	<%@include file="footer.jsp" %>
+<!-- /.footer -->  

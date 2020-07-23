@@ -32,7 +32,7 @@
         <div class="col-12">
           <div class="card">
           <div class="card-header">
-        		 <h3 class="card-title">Billing Form</h3>       
+        		 <h3 class="card-title"><i class='fas fa-edit' aria-hidden='true'></i> Billing Form</h3>       
           </div>
             <!-- /.card-header -->
             <div class="card-body">

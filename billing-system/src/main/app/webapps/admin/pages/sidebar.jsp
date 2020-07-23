@@ -23,7 +23,7 @@
 						<font color="red" class="lead"><h3>Rp.</h3></font>
 					</div>
 					<div class="info">
-						<font class="lead" color="#C0C0C0"><b>123.394.000,-</b></font>
+						<font class="lead" color="#C0C0C0"><b>${balance},-</b></font>
 					</div>
 					
 				<!-- div class="info">

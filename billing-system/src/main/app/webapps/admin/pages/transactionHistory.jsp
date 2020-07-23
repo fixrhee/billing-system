@@ -13,13 +13,12 @@
       <div class="container-fluid">
         <div class="row mb-2">
           <div class="col-sm-6">
-            <h1>Invoice Detail / <font color="blue">${invoiceNo}</font></h1>
+            <h1>Transaction History</h1>
           </div>
           <div class="col-sm-6">
             <ol class="breadcrumb float-sm-right">
               <li class="breadcrumb-item"><a href="index">Home</a></li>
-              <li class="breadcrumb-item"><a href="invoice">Invoice</a></li>
-              <li class="breadcrumb-item active">Detail</li>
+              <li class="breadcrumb-item active"><a href="transactionHistory">Transaction History</a></li>
             </ol>
           </div>
         </div>  
@@ -29,88 +28,13 @@
     <!-- Main content -->
     <section class="content">
     
-     <div class="row">
-        <div class="col-md-6">
-          <div class="card">
-            <!-- /.card-header -->
-   
-            <div class="card-body">
-              <h3 class="card-title">Billing</h3>
-              <div>&nbsp;</div>
-              <div>&nbsp;</div>
-      	     <table class="table table-striped">
-                    <tr>
-                      <td><b>Name</b></td>
-                      <td align="right">${billingName}</td>
- 				    </tr>
-                    <tr>
-                      <td><b>Description</b></td>
-                      <td align="right">${description}</td>
- 				    </tr>
-                    <tr>
-                      <td><b>Billing Cycle</b></td>
-                      <td align="right">${billingCycle}</td>
- 				    </tr>
-                    <tr>
-                      <td><b>Outstanding</b></td>
-                      <td align="right"><span class='right badge badge-info'>${outstanding}</span></td>
- 				    </tr>
- 			 </table>
-            </div>
-            <!-- /.card-body -->           
-           </div>        
-          <!-- /.card -->   
-          
-        </div>
-        <!-- /.col -->
-        
-        <div class="col-md-6">
-          <div class="card">
-            <!-- /.card-header -->
-   
-            <div class="card-body">
-              <h3 class="card-title">Member</h3>
-              <div>&nbsp;</div>
-              <div>&nbsp;</div>
-      	     <table class="table table-striped">
-                    <tr>
-                      <td><b>Name</b></td>
-                      <td align="right">${memberName}</td>
- 				    </tr>
-                    <tr>
-                      <td><b>Mobile</b></td>
-                      <td align="right">${memberMsisdn}</td>
- 				    </tr>
-                    <tr>
-                      <td><b>Email</b></td>
-                      <td align="right">${memberEmail}</td>
- 				    </tr>
-                    <tr>
-                      <td><b>Address</b></td>
-                      <td align="right">${memberAddress}</td>
- 				    </tr>
- 			 </table>
-            </div>
-            <!-- /.card-body -->           
-           </div>        
-          <!-- /.card -->   
-          
-             </div>
-        <!-- /.col -->
-        
-        </div>
-        <!-- /.row -->
-      
       <div class="row">
         <div class="col-md-12">
           <div class="card">
       		 <div class="card-header">
-              <h3 class="card-title">Invoice History</h3>
+              <h3 class="card-title">Transaction History</h3>
               <div class="card-tools">
-              
-              
-                       <div class="input-group-prepend">
-           
+                 <div class="input-group-prepend">
               <div id="reportrange" class="pull-right" style="background: #fff; cursor: pointer; padding: 5px 10px; border: 1px solid #ccc">
                       <i class="glyphicon glyphicon-calendar fa fa-calendar"></i>
                       <span></span> <b class="caret"></b>
@@ -144,14 +68,17 @@
                 <thead>
                 <tr>
                   <th>Date</th>
+                  <th>From/To</th>
+                  <th>Transaction</th>
                   <th>Amount</th>
-                  <th>Status</th>
-                  <th>Payment Date</th>
+                  <th>Trace Number</th>
+                  <th>Description</th>
+                  <th>Transaction Number</th>
                 </tr>
                 </thead>
               </table>
-                <input  type="hidden" name="from" id="from" value="${fromDate}" /> 
-				<input  type="hidden" name="to" id="to" value="${endDate}" />    
+                <input  type="hidden" name="from" id="from" value="2020-07-01" /> 
+				<input  type="hidden" name="to" id="to" value="2020-07-30" />    
             </div>
             <!-- /.card-body -->        
             </div>        
@@ -232,21 +159,26 @@ $(document).ready(function() {
        				 "bFilter": false,
        				 "bSort" : false,
        			     "ajax" : {
-       					 "url" : "invoiceHistoryData",
+       					 "url" : "transactionHistoryData",
        					   "data" : function ( d ) {
- 		            	  		d.invoiceID = "${invoiceID}";
- 		            	  		d.fromDate = document.getElementById("from").value;
+ 		            	  		d.startDate = document.getElementById("from").value;
  		            	  		d.endDate = document.getElementById("to").value;
  			            	}
  		              },
  			     	 "columns" : [{
 								"data" : "date"
 							}, {
+								"data" : "member"
+							}, {
+								"data" : "transaction"
+							}, {
 								"data" : "amount"
 							}, {
-								"data" : "status"
+								"data" : "traceNo"
 							}, {
-								"data" : "paymentDate"
+								"data" : "description"
+							}, {
+								"data" : "transactionNumber"
 							}]
 					});
 </script>

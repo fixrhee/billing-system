@@ -49,12 +49,15 @@
 		<url-pattern>/invoiceDetail</url-pattern>
 		<url-pattern>/viewInvoice</url-pattern>
 		<url-pattern>/invoiceData</url-pattern>
+		<url-pattern>/invoiceHistoryData</url-pattern>
 		<url-pattern>/invoicePrint</url-pattern>
 		<url-pattern>/createInvoice</url-pattern>
 		<url-pattern>/submitInvoice</url-pattern>
 		<url-pattern>/submitInvoiceResult</url-pattern>
 		<url-pattern>/message</url-pattern>
 		<url-pattern>/messageData</url-pattern>
+		<url-pattern>/transactionHistory</url-pattern>
+		<url-pattern>/transactionHistoryData</url-pattern>
 	</servlet-mapping>
 
 	<listener>

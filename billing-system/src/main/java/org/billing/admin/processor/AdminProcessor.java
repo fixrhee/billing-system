@@ -416,6 +416,23 @@ public class AdminProcessor {
 		return new JSONObject(result);
 	}
 
+	public JSONObject loadPublishedInvoiceHistory(String token, String invoiceID, int currentPage, int pageSize,
+			String start, String end) throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/invoice/publish/history");
+		builder.setParameter("currentPage", String.valueOf(currentPage))
+				.setParameter("pageSize", String.valueOf(pageSize)).setParameter("startDate", start)
+				.setParameter("endDate", end).setParameter("invoiceID", invoiceID);
+		HttpGet get = new HttpGet(builder.build());
+
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+		return new JSONObject(result);
+	}
+
 	public JSONObject createBilling(String name, String desc, String cycle, String outstanding, String token)
 			throws MalformedURLException, IOException {
 		String result = "";
@@ -442,6 +459,40 @@ public class AdminProcessor {
 		String result = "";
 		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/message");
 		builder.setParameter("currentPage", currentPage).setParameter("pageSize", pageSize);
+		HttpGet get = new HttpGet(builder.build());
+
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+
+		return new JSONObject(result);
+	}
+
+	public JSONObject loadBalanceInquiry(String token, String accountID)
+			throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/transaction/balanceInquiry");
+		builder.setParameter("accountID", String.valueOf(accountID));
+		HttpGet get = new HttpGet(builder.build());
+
+		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);
+		try (CloseableHttpClient httpClient = HttpClients.createDefault();
+				CloseableHttpResponse response = httpClient.execute(get)) {
+			result = EntityUtils.toString(response.getEntity(), StandardCharsets.UTF_8);
+		}
+
+		return new JSONObject(result);
+	}
+
+	public JSONObject loadTransactionHistory(String token, String startDate, String endDate, int currentPage,
+			int pageSize) throws MalformedURLException, IOException, URISyntaxException {
+		String result = "";
+		URIBuilder builder = new URIBuilder("http://localhost:8900/host/api/transaction/history");
+		builder.setParameter("currentPage", String.valueOf(currentPage))
+				.setParameter("pageSize", String.valueOf(pageSize)).setParameter("startDate", startDate)
+				.setParameter("endDate", endDate);
 		HttpGet get = new HttpGet(builder.build());
 
 		get.setHeader(HttpHeaders.AUTHORIZATION, "Bearer " + token);

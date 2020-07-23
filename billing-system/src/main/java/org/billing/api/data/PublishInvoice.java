@@ -16,6 +16,7 @@ public class PublishInvoice {
 	private String description;
 	private String status;
 	private Date createdDate;
+	private Date paymentDate;
 
 	public Billing getBilling() {
 		return billing;
@@ -103,6 +104,14 @@ public class PublishInvoice {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Date getPaymentDate() {
+		return paymentDate;
+	}
+
+	public void setPaymentDate(Date paymentDate) {
+		this.paymentDate = paymentDate;
 	}
 
 }

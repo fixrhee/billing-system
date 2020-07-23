@@ -26,7 +26,6 @@
       </div><!-- /.container-fluid -->
       <div align="right">
         		<button type="button" class="btn btn-primary" onclick="window.location.href='createInvoice?billingID=${billingID}';"><i class="fa fa-plus-circle" aria-hidden="true"></i> Add Invoice</button>
-               		<button type="button" class="btn btn-secondary" onclick="window.location.href='createInvoice';"><i class="fa fa-edit" aria-hidden="true"></i> Edit Billing</button>
         </div>
     </section>
 

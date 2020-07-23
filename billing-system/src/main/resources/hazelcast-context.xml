@@ -18,6 +18,7 @@ http://www.hazelcast.com/schema/spring classpath:hazelcast.xsd">
 				</hz:join>
 			</hz:network>
 			<hz:map name="MemberLock" time-to-live-seconds="90" />
+			<hz:map name="AccountLock" time-to-live-seconds="90" />
 			<hz:map name="Biller" time-to-live-seconds="3600" />
 		</hz:config>
 	</hz:hazelcast>

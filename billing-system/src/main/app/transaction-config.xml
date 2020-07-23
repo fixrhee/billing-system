@@ -18,10 +18,11 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 	<flow name="testFlow">
 		<http:listener config-ref="HTTP_Listener_Configuration"
 			path="test" allowedMethods="POST" doc:name="HTTP" />
-			<logger level="INFO" doc:name="Logger"/>
-			<logger level="INFO" message="#[payload]" doc:name="Logger"/>
-			<logger level="INFO" message="#[payload.'dynamic_form[dynamic_form][0][item]']" doc:name="Logger"/>
-			<set-payload value="OK" doc:name="Set Payload"/>
+		<logger level="INFO" doc:name="Logger" />
+		<logger level="INFO" message="#[payload]" doc:name="Logger" />
+		<logger level="INFO"
+			message="#[payload.'dynamic_form[dynamic_form][0][item]']" doc:name="Logger" />
+		<set-payload value="OK" doc:name="Set Payload" />
 	</flow>
 
 	<flow name="transaction-balanceInqFlow">
@@ -32,9 +33,14 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			variableName="token" doc:name="Variable" />
 		<message-filter onUnaccepted="invalidParameterFlow"
 			doc:name="Message">
-			<expression-filter expression="#[flowVars['token'] != null]" />
+			<and-filter>
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.accountID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
 		</message-filter>
-		<invoke method="getBalanceInquiry" methodArguments="#[flowVars['token']]"
+		<invoke method="getBalanceInquiry"
+			methodArguments="#[flowVars['token']], #[message.inboundProperties.'http.query.params'.accountID]"
 			object-ref="TransactionServiceImpl" doc:name="Invoke" />
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
 	</flow>
@@ -49,6 +55,10 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			doc:name="Message">
 			<and-filter>
 				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.startDate != null]" />
+				<expression-filter
+					expression="#[message.inboundProperties.'http.query.params'.endDate != null]" />
+				<expression-filter
 					expression="#[message.inboundProperties.'http.query.params'.currentPage != null]" />
 				<expression-filter
 					expression="#[message.inboundProperties.'http.query.params'.pageSize != null]" />
@@ -56,7 +66,59 @@ http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/htt
 			</and-filter>
 		</message-filter>
 		<invoke method="loadTransactionHistory"
-			methodArguments="#[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[flowVars['token']]"
+			methodArguments="#[message.inboundProperties.'http.query.params'.startDate], #[message.inboundProperties.'http.query.params'.endDate], #[message.inboundProperties.'http.query.params'.currentPage], #[message.inboundProperties.'http.query.params'.pageSize], #[flowVars['token']]"
+			object-ref="TransactionServiceImpl" doc:name="Invoke" />
+		<flow-ref name="responseFlow" doc:name="Flow Reference" />
+	</flow>
+
+	<flow name="transaction-doPaymentFlow">
+		<http:listener config-ref="HTTP_Listener_Configuration"
+			path="transaction/payment" allowedMethods="POST" doc:name="HTTP" />
+		<set-variable
+			value="#[org.apache.commons.lang.StringUtils.substring(message.inboundProperties.authorization,7)]"
+			variableName="token" doc:name="Variable" />
+		<message-filter onUnaccepted="invalidParameterFlow"
+			doc:name="Message">
+			<and-filter>
+				<expression-filter expression="#[payload.from != null]" />
+				<expression-filter expression="#[payload.to != null]" />
+				<expression-filter expression="#[payload.amount != null]" />
+				<expression-filter expression="#[payload.traceNo != null]" />
+				<expression-filter expression="#[payload.transferTypeID != null]" />
+				<expression-filter expression="#[flowVars['token'] != null]" />
+			</and-filter>
+		</message-filter>
+		<choice doc:name="Choice">
+			<when expression="#[payload.refNo != null]">
+				<set-variable value="#[payload.refNo]" variableName="refNo"
+					doc:name="Variable" />
+			</when>
+			<otherwise>
+				<set-variable value="NA" variableName="refNo" doc:name="Variable" />
+			</otherwise>
+		</choice>
+		<choice doc:name="Choice">
+			<when expression="#[payload.transactionState != null]">
+				<set-variable value="#[payload.transactionState]"
+					variableName="transactionState" doc:name="Variable" />
+			</when>
+			<otherwise>
+				<set-variable value="PROCESSED" variableName="transactionState"
+					doc:name="Variable" />
+			</otherwise>
+		</choice>
+		<choice doc:name="Choice">
+			<when expression="#[payload.description != null]">
+				<set-variable value="#[payload.description]"
+					variableName="description" doc:name="Variable" />
+			</when>
+			<otherwise>
+				<set-variable value="NA" variableName="description"
+					doc:name="Variable" />
+			</otherwise>
+		</choice>
+		<invoke method="doPayment"
+			methodArguments="#[payload.from], #[payload.to], #[payload.traceNo], #[flowVars['description']], #[flowVars['refNo']], #[payload.amount], #[payload.transferTypeID], #[flowVars['transactionState']], #[flowVars['token']]"
 			object-ref="TransactionServiceImpl" doc:name="Invoke" />
 		<flow-ref name="responseFlow" doc:name="Flow Reference" />
 	</flow>

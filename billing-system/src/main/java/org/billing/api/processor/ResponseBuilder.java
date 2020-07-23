@@ -41,6 +41,18 @@ public abstract class ResponseBuilder {
 			return new ServiceResponse(arg.toString(), "403", "Method not Allowed", payload);
 		case INVALID_DATE:
 			return new ServiceResponse(arg.toString(), "403", "Invalid Date Format", payload);
+		case INVALID_TRANSFER_TYPE:
+			return new ServiceResponse(arg.toString(), "404", "The Specified Transfer Type Not Found On System",
+					payload);
+		case INVALID_ACCOUNT:
+			return new ServiceResponse(arg.toString(), "404", "The Specified Account Not Found On System", payload);
+		case INSUFFICIENT_BALANCE:
+			return new ServiceResponse(arg.toString(), "429",
+					"You dont have enough balance to process this transaction", payload);
+		case ALREADY_PAID:
+			return new ServiceResponse(arg.toString(), "429", "Transaction Already Paid", payload);
+		case NO_TRANSACTION:
+			return new ServiceResponse(arg.toString(), "404", "No Transaction Found", payload);
 		default:
 			return new ServiceResponse("UNKNOWN_ERROR", "500", "Transaction Failed, Please Contact Administrator",
 					payload);

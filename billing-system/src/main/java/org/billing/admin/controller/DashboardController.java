@@ -22,7 +22,6 @@ import java.util.TimeZone;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
-import org.apache.commons.lang3.StringUtils;
 import org.billing.admin.processor.AdminProcessor;
 import org.billing.admin.processor.TimeAgo;
 import org.billing.api.processor.Utils;
@@ -39,7 +38,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.ModelAndView;
-
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hazelcast.core.HazelcastInstance;
 import com.hazelcast.core.IMap;
@@ -63,6 +61,13 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String lastTrx = loadTrxHistoryTable(sessionID, member, Utils.getCurrentMonthFirstDate(),
+					Utils.getCurrentMonthLastDate(), 0, 5);
+			String lastBilling = loadBillingTable(sessionID, member, Utils.getCurrentMonthFirstDate(),
+					Utils.getCurrentMonthLastDate(), 0, 5);
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -74,6 +79,8 @@ public class DashboardController {
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
 			model.addAttribute("unread", unread);
+			model.addAttribute("lastTrx", lastTrx);
+			model.addAttribute("lastBilling", lastBilling);
 			return new ModelAndView("index");
 		} catch (Exception ex) {
 			ex.printStackTrace();
@@ -95,6 +102,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -128,6 +138,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject memberDetail = adminProcessor.loadMemberByID(sessionID, memberID);
 			String username = memberDetail.getJSONObject("payload").getString("username");
 			String name = memberDetail.getJSONObject("payload").getString("name");
@@ -177,6 +190,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -216,6 +232,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject res = adminProcessor.createMember(name, msisdn, email, address, idcard, sessionID);
 			if (res.getString("status").equalsIgnoreCase("PROCESSED")) {
 				model.addAttribute("message", "OK");
@@ -256,6 +275,9 @@ public class DashboardController {
 				model.addAttribute("notification", "error");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -289,6 +311,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			Integer memberID = memberInfo.getJSONObject("payload").getInt("id");
 			String path = "/Volumes/Data/upload";
@@ -448,6 +473,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -484,7 +512,9 @@ public class DashboardController {
 
 			JSONObject dataStat = adminProcessor.loadInvoiceStat(sessionID, String.valueOf(billingID),
 					Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate());
-
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject billing = adminProcessor.loadBillingByID(sessionID, billingID);
 			String billingName = billing.getJSONObject("payload").getString("name");
 			String description = billing.getJSONObject("payload").getString("description");
@@ -547,6 +577,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -624,6 +657,9 @@ public class DashboardController {
 				model.addAttribute("notification", "error");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -736,9 +772,11 @@ public class DashboardController {
 									+ "</a>");
 					jsonData.put("name", data.getJSONObject("payload").getJSONObject("body").getJSONObject("member")
 							.getString("name"));
-					jsonData.put("amount", data.getJSONObject("payload").getJSONObject("body").getDouble("amount"));
-					jsonData.put("invoice",
-							data.getJSONObject("payload").getJSONObject("body").getString("invoiceNumber"));
+					jsonData.put("amount", Utils.formatAmount(
+							(int) data.getJSONObject("payload").getJSONObject("body").getDouble("amount")));
+					jsonData.put("invoice", "<a href='invoiceDetail?invoiceID="
+							+ data.getJSONObject("payload").getJSONObject("body").getInt("invoiceID") + "'>"
+							+ data.getJSONObject("payload").getJSONObject("body").getString("invoiceNumber") + "</a>");
 					if (data.getJSONObject("payload").getJSONObject("body").getString("status")
 							.equalsIgnoreCase("PAID")) {
 						jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
@@ -768,9 +806,11 @@ public class DashboardController {
 										+ "</a>");
 						jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
 								.getString("name"));
-						jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
-						jsonData.put("invoice",
-								payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
+						jsonData.put("amount", Utils
+								.formatAmount((int) payload.getJSONArray("body").getJSONObject(i).getDouble("amount")));
+						jsonData.put("invoice", "<a href='invoiceDetail?invoiceID="
+								+ payload.getJSONArray("body").getJSONObject(i).getInt("invoiceID") + "'>"
+								+ payload.getJSONArray("body").getJSONObject(i).getString("invoiceNumber") + "</a>");
 						if (payload.getJSONArray("body").getJSONObject(i).getString("status")
 								.equalsIgnoreCase("PAID")) {
 							jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
@@ -802,9 +842,11 @@ public class DashboardController {
 										+ "</a>");
 						jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
 								.getString("name"));
-						jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
-						jsonData.put("invoice",
-								payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
+						jsonData.put("amount", Utils
+								.formatAmount((int) payload.getJSONArray("body").getJSONObject(i).getDouble("amount")));
+						jsonData.put("invoice", "<a href='invoiceDetail?invoiceID="
+								+ payload.getJSONArray("body").getJSONObject(i).getInt("invoiceID") + "'>"
+								+ payload.getJSONArray("body").getJSONObject(i).getString("invoiceNumber") + "</a>");
 						if (payload.getJSONArray("body").getJSONObject(i).getString("status")
 								.equalsIgnoreCase("PAID")) {
 							jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
@@ -836,9 +878,11 @@ public class DashboardController {
 										+ "</a>");
 						jsonData.put("name", payload.getJSONArray("body").getJSONObject(i).getJSONObject("member")
 								.getString("name"));
-						jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
-						jsonData.put("invoice",
-								payload.getJSONArray("body").getJSONObject(i).getDouble("invoiceNumber"));
+						jsonData.put("amount", Utils
+								.formatAmount((int) payload.getJSONArray("body").getJSONObject(i).getDouble("amount")));
+						jsonData.put("invoice", "<a href='invoiceDetail?invoiceID="
+								+ payload.getJSONArray("body").getJSONObject(i).getInt("invoiceID") + "'>"
+								+ payload.getJSONArray("body").getJSONObject(i).getString("invoiceNumber") + "</a>");
 						if (payload.getJSONArray("body").getJSONObject(i).getString("status")
 								.equalsIgnoreCase("PAID")) {
 							jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
@@ -874,6 +918,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -907,47 +954,40 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
-			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
 			JSONObject invoice = adminProcessor.loadInvoiceByID(sessionID, invoiceID);
-			String billerName = memberInfo.getJSONObject("payload").getString("name");
-			String billerEmail = memberInfo.getJSONObject("payload").getString("email");
-			String billerAddress = memberInfo.getJSONObject("payload").getString("address");
-
-			String billerMsisdn = memberInfo.getJSONObject("payload").getString("msisdn");
 			String memberName = invoice.getJSONObject("payload").getJSONObject("member").getString("name");
 			String memberEmail = invoice.getJSONObject("payload").getJSONObject("member").getString("email");
 			String memberAddress = invoice.getJSONObject("payload").getJSONObject("member").getString("address");
 			String memberMsisdn = invoice.getJSONObject("payload").getJSONObject("member").getString("msisdn");
 			String invoiceNo = invoice.getJSONObject("payload").getJSONObject("publishInvoice")
 					.getString("invoiceNumber");
-			String paymentCode = invoice.getJSONObject("payload").getJSONObject("publishInvoice")
-					.getString("paymentCode");
-			Double amount = invoice.getJSONObject("payload").getJSONObject("publishInvoice").getDouble("amount");
-
-			String status = invoice.getJSONObject("payload").getJSONObject("publishInvoice").getString("status");
-			Integer paymentDue = invoice.getJSONObject("payload").getJSONObject("billing").getInt("billingCycle");
 			Integer billingID = invoice.getJSONObject("payload").getJSONObject("billing").getInt("id");
-
+			JSONObject billing = adminProcessor.loadBillingByID(sessionID, String.valueOf(billingID));
+			String billingName = billing.getJSONObject("payload").getString("name");
+			String description = billing.getJSONObject("payload").getString("description");
+			Integer cycle = billing.getJSONObject("payload").getInt("billingCycle");
+			boolean outstanding = billing.getJSONObject("payload").getBoolean("outstanding");
 
 			Map<String, String> menus = adminProcessor.getMenu(sessionID, "invoice");
 			String menu = menus.get("menu");
 			String welcomeMenu = menus.get("welcomeMenu");
-			model.addAttribute("name", billerName);
-			model.addAttribute("email", billerEmail);
-			model.addAttribute("address", billerAddress);
-			model.addAttribute("msisdn", billerMsisdn);
 			model.addAttribute("memberName", memberName);
 			model.addAttribute("memberEmail", memberEmail);
 			model.addAttribute("memberAddress", memberAddress);
 			model.addAttribute("memberMsisdn", memberMsisdn);
-			model.addAttribute("billingID", billingID);
-			model.addAttribute("invoiceID", invoiceID);
 			model.addAttribute("invoiceNo", invoiceNo);
-			model.addAttribute("paymentCode", paymentCode);
-			model.addAttribute("paymentDue", paymentDue + "/" + Utils.getCurrentMonth() + "/" + Utils.getCurrentYear());
-			model.addAttribute("amount", Utils.formatAmount(amount.intValue()));
+			model.addAttribute("invoiceID", invoiceID);
+			model.addAttribute("fromDate", Utils.getCurrentMonthFirstDate());
+			model.addAttribute("endDate", Utils.getCurrentMonthLastDate());
+			model.addAttribute("billingName", billingName);
+			model.addAttribute("description", description);
+			model.addAttribute("billingCycle", cycle);
+			model.addAttribute("outstanding", outstanding);
 
 			model.addAttribute("menu", menu);
 			model.addAttribute("welcomeMenu", welcomeMenu);
@@ -964,6 +1004,70 @@ public class DashboardController {
 		}
 	}
 
+	@ResponseBody
+	@RequestMapping(value = "/invoiceHistoryData", method = RequestMethod.GET)
+	public String invoiceHistoryData(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "start") Integer start, @RequestParam(value = "length") Integer length,
+			@RequestParam(value = "invoiceID") String invoiceID, @RequestParam(value = "fromDate") String fromDate,
+			@RequestParam(value = "endDate") String endDate) throws IOException, URISyntaxException, ParseException {
+
+		JSONObject data = adminProcessor.loadPublishedInvoiceHistory(sessionID, invoiceID, start, length, fromDate,
+				endDate);
+		List<Object> jsonList = new LinkedList<Object>();
+		Map<String, Object> jsonMap = new HashMap<String, Object>();
+
+		if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
+			JSONObject payload = data.getJSONObject("payload");
+			for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+				Map<String, Object> jsonData = new HashMap<String, Object>();
+
+				String bDate = payload.getJSONArray("body").getJSONObject(i).getString("createdDate");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+				format.setTimeZone(TimeZone.getTimeZone("GMT"));
+				Date date = format.parse(bDate);
+				String finalDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+
+				if (payload.getJSONArray("body").getJSONObject(i).has("paymentDate")) {
+					String pDate = payload.getJSONArray("body").getJSONObject(i).getString("paymentDate");
+					SimpleDateFormat pformat = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+					format.setTimeZone(TimeZone.getTimeZone("GMT"));
+					Date datePayment = pformat.parse(pDate);
+					String finalPDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(datePayment);
+					jsonData.put("paymentDate", finalPDate);
+				} else {
+					jsonData.put("paymentDate", "<span class='right badge badge-warning'>N/A</span>");
+				}
+
+				jsonData.put("date", finalDate);
+				jsonData.put("amount",
+						Utils.formatAmount((int) payload.getJSONArray("body").getJSONObject(i).getDouble("amount")));
+
+				if (payload.getJSONArray("body").getJSONObject(i).getString("status").equalsIgnoreCase("PAID")) {
+					jsonData.put("status", "<span class='right badge badge-success'>PAID</span>");
+				} else {
+					jsonData.put("status", "<span class='right badge badge-danger'>UNPAID</span>");
+				}
+				jsonList.add(jsonData);
+			}
+			if (jsonList.size() == 0) {
+				jsonMap.put("recordsTotal", 0);
+				jsonMap.put("recordsFiltered", 0);
+			} else {
+				jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+				jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+			}
+		} else {
+			jsonMap.put("recordsTotal", 0);
+			jsonMap.put("recordsFiltered", 0);
+		}
+
+		jsonMap.put("data", jsonList);
+		ObjectMapper Obj = new ObjectMapper();
+		String jsonStr = Obj.writeValueAsString(jsonMap);
+		return jsonStr;
+	}
+
 	@RequestMapping(value = "/viewInvoice", method = { RequestMethod.POST, RequestMethod.GET })
 	public ModelAndView viewInvoice(
 			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
@@ -975,6 +1079,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -1102,7 +1209,16 @@ public class DashboardController {
 					jsonData.put("billing",
 							payload.getJSONObject("payload").getJSONObject("billing").getString("name"));
 					jsonData.put("invoiceNo", payload.getJSONObject("payload").getString("invoiceNumber"));
-					jsonData.put("amount", payload.getJSONObject("payload").getDouble("amount"));
+					jsonData.put("amount",
+							Utils.formatAmount((int) payload.getJSONObject("payload").getDouble("amount")));
+
+					String pDate = payload.getJSONObject("payload").getJSONObject("publishInvoice")
+							.getString("createdDate");
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+					format.setTimeZone(TimeZone.getTimeZone("GMT"));
+					Date date = format.parse(pDate);
+					// date.
+					String finalDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
 
 					boolean active = payload.getJSONObject("payload").getBoolean("active");
 					if (active == false) {
@@ -1140,7 +1256,8 @@ public class DashboardController {
 				jsonData.put("billing",
 						payload.getJSONArray("body").getJSONObject(i).getJSONObject("billing").getString("name"));
 				jsonData.put("invoiceNo", payload.getJSONArray("body").getJSONObject(i).get("invoiceNumber"));
-				jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).get("amount"));
+				jsonData.put("amount",
+						Utils.formatAmount((int) payload.getJSONArray("body").getJSONObject(i).getDouble("amount")));
 
 				boolean active = payload.getJSONArray("body").getJSONObject(i).getBoolean("active");
 				if (active == false) {
@@ -1235,6 +1352,9 @@ public class DashboardController {
 			model.addAttribute("amount4", amount4);
 			model.addAttribute("totalAmount", String.format("%,d", sum).replace(',', '.'));
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -1299,8 +1419,7 @@ public class DashboardController {
 			adminProcessor.createInvoice(sessionID, jo.toString());
 
 			if (save.equalsIgnoreCase("on") && save != null) {
-				System.out.println("[Saving Items to Billing]");
-				System.out.println(adminProcessor.updateBillingItem(sessionID, jdata.toString(), billingID));
+				adminProcessor.updateBillingItem(sessionID, jdata.toString(), billingID);
 			}
 
 			model.addAttribute("message", "OK");
@@ -1337,6 +1456,9 @@ public class DashboardController {
 				model.addAttribute("notification", "danger");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -1368,6 +1490,9 @@ public class DashboardController {
 				return new ModelAndView("redirect:/login");
 			}
 
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
 			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
 			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
 			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
@@ -1429,5 +1554,189 @@ public class DashboardController {
 		ObjectMapper Obj = new ObjectMapper();
 		String jsonStr = Obj.writeValueAsString(jsonMap);
 		return jsonStr;
+	}
+
+	@RequestMapping(value = "/transactionHistory", method = RequestMethod.GET)
+	public ModelAndView transactionHistory(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID, String invoiceID,
+			HttpServletResponse response, Model model) {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return new ModelAndView("redirect:/login");
+			}
+
+			String balance = adminProcessor.loadBalanceInquiry(sessionID, "2").getJSONObject("payload")
+					.getString("formattedBalance");
+			model.addAttribute("balance", balance);
+			JSONObject messages = adminProcessor.loadMessage("0", "5", sessionID);
+			Integer unread = messages.getJSONObject("payload").getInt("unreadMessage");
+			JSONObject memberInfo = adminProcessor.memberInfo(sessionID);
+			String memberName = memberInfo.getJSONObject("payload").getString("name");
+			Map<String, String> menus = adminProcessor.getMenu(sessionID, "transactionHistory");
+			String menu = menus.get("menu");
+			String welcomeMenu = menus.get("welcomeMenu");
+			model.addAttribute("name", memberName);
+			model.addAttribute("menu", menu);
+			model.addAttribute("welcomeMenu", welcomeMenu);
+			model.addAttribute("unread", unread);
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			model.addAttribute("httpResponseCode", "500");
+			model.addAttribute("status", "Oops !");
+			model.addAttribute("description",
+					"We are experiencing some trouble here, but don't worry our team are OTW to solve this");
+			return new ModelAndView("page_exception");
+		}
+		return new ModelAndView("transactionHistory");
+	}
+
+	@ResponseBody
+	@RequestMapping(value = "/transactionHistoryData", method = RequestMethod.GET)
+	public String trxHistoryData(
+			@CookieValue(value = "SessionID", defaultValue = "defaultCookieValue") String sessionID,
+			@RequestParam(value = "start") Integer start, @RequestParam(value = "length") Integer length,
+			@RequestParam(value = "startDate") String startDate, @RequestParam(value = "endDate") String endDate)
+			throws IOException, URISyntaxException, ParseException {
+		try {
+			IMap<String, String> memberMap = instance.getMap("Member");
+			String member = memberMap.get(sessionID);
+			if (member == null) {
+				return null;
+			}
+
+			Map<String, Object> jsonMap = new HashMap<String, Object>();
+			List<Object> jsonList = new LinkedList<Object>();
+			JSONObject data = adminProcessor.loadTransactionHistory(sessionID, startDate, endDate, start, length);
+
+			if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
+				JSONObject payload = data.getJSONObject("payload");
+				for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+					Map<String, Object> jsonData = new HashMap<String, Object>();
+					String bDate = payload.getJSONArray("body").getJSONObject(i).getString("transactionDate");
+					SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+					format.setTimeZone(TimeZone.getTimeZone("GMT"));
+					Date date = format.parse(bDate);
+					String finalDate = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss").format(date);
+					jsonData.put("date", finalDate);
+
+					String fromMember = payload.getJSONArray("body").getJSONObject(i).getJSONObject("fromMember")
+							.getString("name");
+					if (fromMember.equalsIgnoreCase(memberMap.get(sessionID))) {
+						jsonData.put("member", payload.getJSONArray("body").getJSONObject(i).getJSONObject("toMember")
+								.getString("name"));
+					} else {
+						jsonData.put("member", fromMember);
+					}
+
+					jsonData.put("transaction", payload.getJSONArray("body").getJSONObject(i)
+							.getJSONObject("transferType").getString("name"));
+
+					jsonData.put("amount", payload.getJSONArray("body").getJSONObject(i).getDouble("amount"));
+					jsonData.put("description", payload.getJSONArray("body").getJSONObject(i).getString("description"));
+					jsonData.put("traceNo", payload.getJSONArray("body").getJSONObject(i).getString("traceNo"));
+					jsonData.put("transactionNumber",
+							payload.getJSONArray("body").getJSONObject(i).getString("transactionNumber"));
+					jsonList.add(jsonData);
+				}
+
+				jsonMap.put("recordsTotal", payload.getInt("totalRecord"));
+				jsonMap.put("recordsFiltered", payload.getInt("totalRecord"));
+			} else {
+				jsonMap.put("recordsTotal", 0);
+				jsonMap.put("recordsFiltered", 0);
+			}
+			jsonMap.put("data", jsonList);
+			ObjectMapper Obj = new ObjectMapper();
+			String jsonStr = Obj.writeValueAsString(jsonMap);
+			return jsonStr;
+		} catch (Exception ex) {
+			ex.printStackTrace();
+			return null;
+		}
+	}
+
+	public String loadTrxHistoryTable(String sessionID, String billerUsername, String startDate, String endDate,
+			int start, int length) throws ParseException, MalformedURLException, IOException, URISyntaxException {
+		JSONObject data = adminProcessor.loadTransactionHistory(sessionID, startDate, endDate, start, length);
+		StringBuffer sb = new StringBuffer();
+		if (data.getString("status").equalsIgnoreCase("PROCESSED")) {
+			JSONObject payload = data.getJSONObject("payload");
+			for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+				Map<String, Object> jsonData = new HashMap<String, Object>();
+				sb.append("<tr>");
+				String bDate = payload.getJSONArray("body").getJSONObject(i).getString("transactionDate");
+				SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSSZ");
+				format.setTimeZone(TimeZone.getTimeZone("GMT"));
+				Date date = format.parse(bDate);
+				String finalDate = new SimpleDateFormat("yyyy-MM-dd").format(date);
+				jsonData.put("date", finalDate);
+
+				sb.append("<td>" + finalDate + "</td>");
+				String fromMember = payload.getJSONArray("body").getJSONObject(i).getJSONObject("fromMember")
+						.getString("name");
+				if (fromMember.equalsIgnoreCase(billerUsername)) {
+					sb.append("<td>"
+							+ payload.getJSONArray("body").getJSONObject(i).getJSONObject("toMember").getString("name")
+							+ "</td>");
+				} else {
+					sb.append("<td>" + fromMember + "</td>");
+				}
+				sb.append("<td>"
+						+ payload.getJSONArray("body").getJSONObject(i).getJSONObject("transferType").getString("name")
+						+ "</td>");
+				sb.append("<td>"
+						+ Utils.formatAmount((int) payload.getJSONArray("body").getJSONObject(i).getDouble("amount"))
+						+ "</td>");
+				sb.append("</tr>");
+			}
+			return sb.toString();
+		} else {
+			return "";
+		}
+	}
+
+	public String loadBillingTable(String sessionID, String billerUsername, String startDate, String endDate, int start,
+			int length) throws ParseException, MalformedURLException, IOException, URISyntaxException {
+		JSONObject data = adminProcessor.loadBilling(sessionID, String.valueOf(start), String.valueOf(length));
+		JSONObject payload = data.getJSONObject("payload");
+		StringBuffer sb = new StringBuffer();
+		for (int i = 0; i < payload.getJSONArray("body").length(); i++) {
+			sb.append("<tr>");
+			JSONObject dataStat = adminProcessor.loadInvoiceStat(sessionID,
+					String.valueOf(payload.getJSONArray("body").getJSONObject(i).getInt("id")),
+					Utils.getCurrentMonthFirstDate(), Utils.getCurrentMonthLastDate());
+			sb.append("<td>" + payload.getJSONArray("body").getJSONObject(i).get("name") + "</td>");
+			sb.append("<td>" + payload.getJSONArray("body").getJSONObject(i).get("description") + "</td>");
+
+			if (dataStat.has("payload")) {
+				double stat = dataStat.getJSONObject("payload").getDouble("paidPercentage");
+				if (stat >= 0 && stat <= 30.0) {
+					sb.append(
+							"<td><div class='progress progress-xs progress-striped active'><div class='progress-bar bg-danger' style='width:"
+									+ +stat + "%'></div></div></td>");
+					sb.append("<td><span class='right badge badge-danger'>" + stat + "%</span></td>");
+				} else if (stat >= 31 && stat <= 50.0) {
+					sb.append(
+							"<td><div class='progress progress-xs progress-striped active'><div class='progress-bar bg-warning' style='width:"
+									+ +stat + "%'></div></div></td>");
+					sb.append("<td><span class='right badge badge-warning'>" + stat + "%</span></td>");
+				} else {
+					sb.append(
+							"<td><div class='progress progress-xs progress-striped active'><div class='progress-bar bg-success' style='width:"
+									+ +stat + "%'></div></div></td>");
+					sb.append("<td><span class='right badge badge-success'>" + stat + "%</span></td>");
+				}
+				sb.append("</tr>");
+			} else {
+				sb.append(
+						"<td><div class='progress progress-xs progress-striped active'><div class='progress-bar bg-danger' style='width:"
+								+ 0 + "%'></div></div></td>");
+				sb.append("<td><span class='right badge badge-danger'>0%</span></td>");
+				sb.append("</tr>");
+			}
+		}
+		return sb.toString();
 	}
 }
